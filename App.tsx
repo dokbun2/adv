@@ -9,8 +9,7 @@ import { ImageEditorModal } from './components/modals/ImageEditorModal';
 import { PromptGuideModal } from './components/modals/PromptGuideModal';
 import { ApiKeyModal } from './components/modals/ApiKeyModal';
 import { Button } from './components/ui/Button';
-import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings } from 'lucide-react';
-
+import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu } from 'lucide-react';
 
 const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: { 
     onGenerate: () => void, 
@@ -18,32 +17,55 @@ const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: {
     isApiKeySet: boolean,
     onOpenApiKey: () => void
 }) => (
-    <header className="flex-shrink-0 bg-white shadow-sm p-3 border-b border-slate-200 z-10">
-        <div className="flex justify-between items-center max-w-screen-2xl mx-auto">
-            <div className="flex items-center gap-3">
-                <div className="bg-slate-800 p-2 rounded-lg">
-                    <Film className="text-white h-6 w-6" />
+    <header className="fixed top-0 left-0 right-0 z-50 glass-dark border-b border-white/[0.08]">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur-lg opacity-50"></div>
+                        <div className="relative bg-black p-2.5 rounded-xl border border-white/10">
+                            <Film className="text-white h-6 w-6" />
+                        </div>
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-semibold text-white">AI Studio Pro</h1>
+                        <p className="text-xs text-gray-400">영상 광고 제작 플랫폼</p>
+                    </div>
                 </div>
-                <h1 className="text-xl font-bold text-slate-800">AI 광고 영상 제작</h1>
-            </div>
-            <div className="flex items-center gap-2">
-                <Button 
-                    onClick={onOpenApiKey} 
-                    variant={isApiKeySet ? "ghost" : "primary"}
-                    size="sm"
-                    className="min-w-[100px]"
-                >
-                    <Key className="w-4 h-4 mr-1" />
-                    {isApiKeySet ? 'API 설정' : 'API 키 설정'}
-                </Button>
-                <Button 
-                    onClick={onGenerate} 
-                    isLoading={isLoading} 
-                    className="min-w-[120px]"
-                    disabled={!isApiKeySet}
-                >
-                    {isLoading ? '생성 중...' : '생성'}
-                </Button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={onOpenApiKey}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            isApiKeySet 
+                                ? 'bg-white/[0.05] text-gray-300 hover:bg-white/[0.08]' 
+                                : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
+                        } border border-white/[0.08]`}
+                    >
+                        <Key className="w-4 h-4 inline mr-2" />
+                        {isApiKeySet ? 'API 설정' : 'API 키 설정'}
+                    </button>
+                    <button
+                        onClick={onGenerate}
+                        disabled={!isApiKeySet || isLoading}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+                            isApiKeySet && !isLoading
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-xl hover:scale-105'
+                                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                        }`}
+                    >
+                        {isLoading ? (
+                            <>
+                                <div className="inline-block w-4 h-4 mr-2 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                생성 중...
+                            </>
+                        ) : (
+                            <>
+                                <Zap className="w-4 h-4 inline mr-2" />
+                                생성하기
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -55,66 +77,116 @@ const InputPanel = ({ topic, setTopic, duration, setDuration, refUrl, setRefUrl,
     refUrl: string, setRefUrl: (s: string) => void,
     onOpenGuide: () => void,
 }) => (
-    <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 flex-shrink-0">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-            <div className="md:col-span-2 relative">
-                <input
-                    type="text"
-                    value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
-                    placeholder="광고 컨셉 입력 (예: 20대 여성을 위한 비건 수분 크림)"
-                    className="w-full bg-slate-100 border border-slate-200 rounded-md px-3 py-2 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none pr-10"
-                />
-                 <button onClick={onOpenGuide} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors" title="프롬프트 작성 가이드">
-                    <Info className="w-5 h-5" />
-                </button>
-            </div>
-            <div className="md:col-span-2 relative">
-                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                    type="url"
-                    value={refUrl}
-                    onChange={(e) => setRefUrl(e.target.value)}
-                    placeholder="참고할 YouTube 영상 URL 입력 (선택 사항)"
-                    className="w-full bg-slate-100 border border-slate-200 rounded-md pl-9 pr-3 py-2 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none"
-                />
+    <div className="glass rounded-2xl p-6 mb-6 border border-white/[0.08]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="relative">
+                <label className="block text-xs font-medium text-gray-400 mb-2">광고 컨셉</label>
+                <div className="relative">
+                    <input
+                        type="text"
+                        value={topic}
+                        onChange={(e) => setTopic(e.target.value)}
+                        placeholder="예: 20대 여성을 위한 비건 수분 크림"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
+                    />
+                    <button 
+                        onClick={onOpenGuide} 
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors"
+                    >
+                        <Info className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
             <div className="relative">
-                <input
-                    type="number"
-                    value={duration}
-                    onChange={(e) => setDuration(Number(e.target.value))}
-                    className="w-full bg-slate-100 border border-slate-200 rounded-md px-3 py-2 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">총 영상 길이(초)</span>
+                <label className="block text-xs font-medium text-gray-400 mb-2">참고 영상 URL</label>
+                <div className="relative">
+                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                        type="url"
+                        value={refUrl}
+                        onChange={(e) => setRefUrl(e.target.value)}
+                        placeholder="YouTube URL (선택)"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
+                    />
+                </div>
+            </div>
+            <div className="relative">
+                <label className="block text-xs font-medium text-gray-400 mb-2">영상 길이</label>
+                <div className="relative">
+                    <input
+                        type="number"
+                        value={duration}
+                        onChange={(e) => setDuration(Number(e.target.value))}
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">초</span>
+                </div>
             </div>
         </div>
     </div>
 );
 
-const LeftPanel = ({ model, product, onAddModel, onAddProduct }: { model: Model | null, product: Product | null, onAddModel: () => void, onAddProduct: () => void }) => (
-    <div className="w-1/4 bg-white p-4 rounded-xl shadow-md border border-slate-200 flex flex-col gap-6">
-        <div className="flex-1 flex flex-col">
-            <h3 className="font-bold mb-2 flex items-center gap-2"><Users className="w-5 h-5" />모델</h3>
-            <div className="bg-slate-100 border border-slate-200 rounded-md flex-grow flex items-center justify-center p-2 min-h-[150px]">
-                {model ? (
-                    <img src={model.sheetImage} alt={model.name} className="w-full h-full object-contain rounded-md" />
-                ) : <p className="text-slate-400 text-sm">모델을 추가하세요</p>}
+const LeftPanel = ({ model, product, onAddModel, onAddProduct }: { 
+    model: Model | null, 
+    product: Product | null, 
+    onAddModel: () => void, 
+    onAddProduct: () => void 
+}) => (
+    <div className="glass rounded-2xl p-6 h-full border border-white/[0.08]">
+        <div className="flex flex-col h-full gap-6">
+            <div className="flex-1">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-white flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-400" />
+                        모델
+                    </h3>
+                </div>
+                <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
+                    <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 min-h-[180px] flex items-center justify-center">
+                        {model ? (
+                            <img src={model.sheetImage} alt={model.name} className="w-full h-full object-contain rounded-lg" />
+                        ) : (
+                            <p className="text-gray-500 text-sm">모델을 추가하세요</p>
+                        )}
+                    </div>
+                </div>
+                <button 
+                    onClick={onAddModel}
+                    className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
+                >
+                    <Users className="w-4 h-4 inline mr-2" />
+                    모델 추가
+                </button>
             </div>
-            <Button onClick={onAddModel} variant="primary" className="mt-3 w-full">+ 모델 추가</Button>
-        </div>
-        <div className="flex-1 flex flex-col">
-            <h3 className="font-bold mb-2 flex items-center gap-2"><Package className="w-5 h-5" />제품</h3>
-            <div className="bg-slate-100 border border-slate-200 rounded-md flex-grow flex items-center justify-center p-2 min-h-[150px]">
-                {product ? (
-                     <img src={product.image} alt={product.name} className="w-full h-full object-contain rounded-md" />
-                ) : <p className="text-slate-400 text-sm">제품을 추가하세요</p>}
+            <div className="flex-1">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-white flex items-center gap-2">
+                        <Package className="w-5 h-5 text-purple-400" />
+                        제품
+                    </h3>
+                </div>
+                <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
+                    <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 min-h-[180px] flex items-center justify-center">
+                        {product ? (
+                            <img src={product.image} alt={product.name} className="w-full h-full object-contain rounded-lg" />
+                        ) : (
+                            <p className="text-gray-500 text-sm">제품을 추가하세요</p>
+                        )}
+                    </div>
+                </div>
+                <button 
+                    onClick={onAddProduct}
+                    className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
+                >
+                    <Package className="w-4 h-4 inline mr-2" />
+                    제품 추가
+                </button>
             </div>
-            <Button onClick={onAddProduct} variant="green" className="mt-3 w-full">+ 제품 추가</Button>
         </div>
     </div>
 );
-
 
 const MiddlePanel = ({ storyboard, onSelectScene, selectedSceneId, isLoading, generatingSceneId, onOpenCreativeDirection, onDownloadAllImages }: {
     storyboard: Storyboard | null,
@@ -125,43 +197,85 @@ const MiddlePanel = ({ storyboard, onSelectScene, selectedSceneId, isLoading, ge
     onOpenCreativeDirection: () => void,
     onDownloadAllImages: () => void,
 }) => (
-    <div className="w-2/5 bg-white p-4 rounded-xl shadow-md border border-slate-200 flex flex-col gap-3">
-        <div className="flex justify-between items-center flex-shrink-0">
-            <h3 className="font-bold text-lg">스토리보드</h3>
-             {storyboard?.scenes?.some(s => s.sceneDetails) && (
-                <Button variant="ghost" size="sm" onClick={onDownloadAllImages}>
-                    <Download className="w-4 h-4 mr-2" />
-                    전체 이미지 다운로드
-                </Button>
+    <div className="glass rounded-2xl p-6 h-full border border-white/[0.08] flex flex-col">
+        <div className="flex justify-between items-center mb-6">
+            <h3 className="font-semibold text-lg text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-green-400" />
+                스토리보드
+            </h3>
+            {storyboard?.scenes?.some(s => s.sceneDetails) && (
+                <button 
+                    onClick={onDownloadAllImages}
+                    className="px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.08] text-white text-sm rounded-lg transition-all border border-white/[0.08]"
+                >
+                    <Download className="w-4 h-4 mr-1.5 inline" />
+                    전체 다운로드
+                </button>
             )}
         </div>
+        
         {generatingSceneId && (
-            <div className="bg-blue-50 text-blue-700 text-sm p-2 rounded-md flex items-center gap-2 flex-shrink-0">
-                <svg className="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                장면 {generatingSceneId}/{storyboard?.scenes?.length} 프레임 생성 중...
+            <div className="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-sm p-3 rounded-xl flex items-center gap-3 mb-4">
+                <div className="w-4 h-4 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin"></div>
+                장면 {generatingSceneId}/{storyboard?.scenes?.length} 생성 중...
             </div>
         )}
+        
         {storyboard?.styleGuide && (
-            <Button onClick={onOpenCreativeDirection} variant="ghost" className="w-full flex-shrink-0">
-                <Sparkles className="w-4 h-4 mr-2 text-blue-500" />
+            <button 
+                onClick={onOpenCreativeDirection}
+                className="w-full mb-4 px-4 py-3 bg-gradient-to-r from-purple-600/10 to-pink-600/10 hover:from-purple-600/20 hover:to-pink-600/20 text-purple-400 rounded-xl transition-all border border-purple-500/20"
+            >
+                <Sparkles className="w-4 h-4 mr-2 inline" />
                 크리에이티브 디렉션 보기
-            </Button>
+            </button>
         )}
-        <div className="flex-grow overflow-y-auto space-y-2 pr-2">
-            {isLoading && <div className="flex items-center justify-center h-full text-slate-500">스토리보드 생성 중...</div>}
-            {!isLoading && !storyboard && <div className="flex items-center justify-center h-full text-center text-slate-500"><p>상단에서 광고 정보를 입력하고<br/>생성 버튼을 눌러주세요.</p></div>}
+        
+        <div className="flex-grow overflow-y-auto space-y-3 pr-2" style={{ background: 'transparent' }}>
+            {isLoading && (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                    <Cpu className="w-12 h-12 mb-3 animate-pulse" />
+                    <p>스토리보드 생성 중...</p>
+                </div>
+            )}
+            {!isLoading && !storyboard && (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 text-center">
+                    <Film className="w-12 h-12 mb-3 opacity-50" />
+                    <p>광고 정보를 입력하고</p>
+                    <p className="text-sm">생성 버튼을 눌러주세요</p>
+                </div>
+            )}
             {storyboard?.scenes?.map(scene => (
-                <div key={scene.id} onClick={() => onSelectScene(scene)} className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${selectedSceneId === scene.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-blue-400'}`}>
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-start gap-3">
-                            <span className="flex-shrink-0 bg-slate-200 text-slate-600 rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm mt-0.5">{scene.id}</span>
-                            <div>
-                                <p className="font-semibold text-sm truncate max-w-[200px]">{scene.title}</p>
-                                <p className="text-xs text-slate-500">{scene.duration} seconds</p>
+                <div 
+                    key={scene.id} 
+                    onClick={() => onSelectScene(scene)}
+                    className={`p-4 rounded-xl cursor-pointer transition-all border ${
+                        selectedSceneId === scene.id 
+                            ? 'bg-gradient-to-r from-blue-600/10 to-purple-600/10 border-blue-500/30' 
+                            : 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.12]'
+                    }`}
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                                selectedSceneId === scene.id
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                    : 'bg-white/[0.05] text-gray-400'
+                            }`}>
+                                {scene.id}
                             </div>
                         </div>
-                        <div className="flex gap-1.5 flex-shrink-0">
-                            {scene.previewImages.map((img, idx) => <img key={idx} src={img} alt={`Preview ${idx + 1}`} className="w-16 h-10 object-cover rounded-md bg-slate-200" />)}
+                        <div className="flex-grow min-w-0">
+                            <p className="font-medium text-white truncate">{scene.title}</p>
+                            <p className="text-xs text-gray-400 mt-1">{scene.duration}초</p>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                            {scene.previewImages.map((img, idx) => (
+                                <div key={idx} className="relative">
+                                    <img src={img} alt={`Preview ${idx + 1}`} className="w-16 h-10 object-cover rounded-lg" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -195,29 +309,36 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
     };
 
     if (!scene) {
-        return <div className="w-[35%] bg-white p-4 rounded-xl shadow-md border border-slate-200 flex items-center justify-center"><p className="text-slate-500">스토리보드에서 장면을 선택하세요.</p></div>;
+        return (
+            <div className="glass rounded-2xl p-6 h-full border border-white/[0.08] flex items-center justify-center">
+                <p className="text-gray-400">스토리보드에서 장면을 선택하세요</p>
+            </div>
+        );
     }
 
     return (
-        <div className="w-[35%] bg-white p-4 rounded-xl shadow-md border border-slate-200 flex flex-col gap-4 overflow-y-auto">
-            <h3 className="font-bold text-lg flex items-center gap-2"><BookOpen className="w-5 h-5" />시나리오</h3>
+        <div className="glass rounded-2xl p-6 h-full border border-white/[0.08] overflow-y-auto">
+            <h3 className="font-semibold text-lg text-white mb-4 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-orange-400" />
+                시나리오
+            </h3>
             
-            <div className="bg-slate-100 p-3 rounded-lg border border-slate-200">
-                <h4 className="font-semibold text-sm text-slate-800">{scene.title}</h4>
-                <p className="text-sm text-slate-600 mt-1">{scene.description}</p>
+            <div className="bg-white/[0.02] border border-white/[0.08] p-4 rounded-xl mb-4">
+                <h4 className="font-semibold text-white mb-2">{scene.title}</h4>
+                <p className="text-sm text-gray-300">{scene.description}</p>
             </div>
             
             {!details && (
-                 <div className="flex-grow flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center py-12">
                     {isGeneratingFrames ? (
-                        <div className="text-center text-slate-500">
-                             <svg className="animate-spin mx-auto h-8 w-8 mb-2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <div className="text-center text-gray-400">
+                            <div className="w-8 h-8 border-3 border-gray-600 border-t-white rounded-full animate-spin mx-auto mb-3"></div>
                             프레임 생성 중...
                         </div>
                     ) : (
-                        <div className="text-center text-slate-500">
-                            <p>장면 프레임이 생성되지 않았습니다.</p>
-                            <p className="text-xs">상단의 '생성' 버튼을 눌러주세요.</p>
+                        <div className="text-center text-gray-400">
+                            <p>프레임이 생성되지 않았습니다</p>
+                            <p className="text-xs mt-1">상단의 '생성' 버튼을 눌러주세요</p>
                         </div>
                     )}
                 </div>
@@ -225,117 +346,208 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
             
             {details && (
                 <>
-                    <div className="bg-slate-100 p-3 rounded-lg border border-slate-200">
-                        <h4 className="font-semibold text-sm text-slate-800 flex items-center gap-2"><Languages className="w-4 h-4" />영문 프롬프트 (Frame Generation)</h4>
-                        <pre className="text-xs text-slate-700 mt-2 font-mono bg-slate-200 p-2 rounded whitespace-pre-wrap overflow-x-auto">{details.prompt}</pre>
+                    <div className="bg-white/[0.02] border border-white/[0.08] p-4 rounded-xl mb-4">
+                        <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
+                            <Languages className="w-4 h-4" />
+                            영문 프롬프트
+                        </h4>
+                        <pre className="text-xs text-gray-300 bg-black/30 p-3 rounded-lg whitespace-pre-wrap overflow-x-auto font-mono">
+                            {details.prompt}
+                        </pre>
                     </div>
 
-                    <div>
-                        <div className="relative group cursor-pointer" onClick={() => onEditImage(scene.id, 'start', details.startFrame)}>
-                            <img src={details.startFrame} alt="Start Frame" className="rounded-lg w-full aspect-video object-cover bg-slate-200" />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
-                                <Wand2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                            <span className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-0.5 rounded">시작 프레임</span>
-                        </div>
-                        <div className="bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200">
-                            <h4 className="font-semibold text-sm text-slate-800 flex items-center gap-2"><Bot className="w-4 h-4" />Midjourney 최적화 프롬프트 (시작 프레임)</h4>
-                            {!midjourneyPrompts.start && (
-                                <Button onClick={() => onGenerateMidjourneyPrompt('start')} isLoading={isGeneratingMidjourneyPrompt === 'start'} size="sm" className="mt-2">
-                                    {isGeneratingMidjourneyPrompt === 'start' ? '생성 중...' : '생성'}
-                                </Button>
-                            )}
-                            {midjourneyPrompts.start && (
-                                 <div className="relative mt-2">
-                                    <textarea readOnly value={midjourneyPrompts.start} rows={4} className="w-full bg-slate-200 text-slate-700 text-xs p-2 rounded-md resize-none border border-slate-300 focus:outline-none pr-10 font-mono"></textarea>
-                                     <Button variant="ghost" size="sm" className="absolute top-2 right-2 !p-1.5 h-auto" onClick={() => handleCopy(midjourneyPrompts.start!, 'midjourney-start')}>
-                                        {copiedPrompt === 'midjourney-start' ? <Check className="w-4 h-4 text-green-600" /> : <Clipboard className="w-4 h-4 text-slate-500" />}
-                                    </Button>
+                    <div className="space-y-4">
+                        {/* Start Frame */}
+                        <div>
+                            <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => onEditImage(scene.id, 'start', details.startFrame)}>
+                                <img src={details.startFrame} alt="Start Frame" className="w-full aspect-video object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                                    <Wand2 className="w-10 h-10 text-white drop-shadow-lg" />
                                 </div>
-                            )}
+                                <span className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">시작 프레임</span>
+                            </div>
+                            
+                            <div className="mt-3 bg-white/[0.02] border border-white/[0.08] p-3 rounded-xl">
+                                <h5 className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                                    <Bot className="w-4 h-4" />
+                                    Midjourney 프롬프트 (시작)
+                                </h5>
+                                {!midjourneyPrompts.start ? (
+                                    <button 
+                                        onClick={() => onGenerateMidjourneyPrompt('start')}
+                                        disabled={isGeneratingMidjourneyPrompt === 'start'}
+                                        className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm rounded-lg hover:shadow-lg transition-all"
+                                    >
+                                        {isGeneratingMidjourneyPrompt === 'start' ? '생성 중...' : '생성'}
+                                    </button>
+                                ) : (
+                                    <div className="relative">
+                                        <textarea 
+                                            readOnly 
+                                            value={midjourneyPrompts.start} 
+                                            rows={3} 
+                                            className="w-full bg-black/30 text-gray-300 text-xs p-3 rounded-lg resize-none font-mono"
+                                        />
+                                        <button 
+                                            onClick={() => handleCopy(midjourneyPrompts.start!, 'midjourney-start')}
+                                            className="absolute top-2 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-all"
+                                        >
+                                            {copiedPrompt === 'midjourney-start' ? 
+                                                <Check className="w-4 h-4 text-green-400" /> : 
+                                                <Clipboard className="w-4 h-4 text-gray-400" />
+                                            }
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* End Frame */}
+                        <div>
+                            <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => onEditImage(scene.id, 'end', details.endFrame)}>
+                                <img src={details.endFrame} alt="End Frame" className="w-full aspect-video object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                                    <Wand2 className="w-10 h-10 text-white drop-shadow-lg" />
+                                </div>
+                                <span className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">종료 프레임</span>
+                            </div>
+                            
+                            <div className="mt-3 bg-white/[0.02] border border-white/[0.08] p-3 rounded-xl">
+                                <h5 className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                                    <Bot className="w-4 h-4" />
+                                    Midjourney 프롬프트 (종료)
+                                </h5>
+                                {!midjourneyPrompts.end ? (
+                                    <button 
+                                        onClick={() => onGenerateMidjourneyPrompt('end')}
+                                        disabled={isGeneratingMidjourneyPrompt === 'end'}
+                                        className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm rounded-lg hover:shadow-lg transition-all"
+                                    >
+                                        {isGeneratingMidjourneyPrompt === 'end' ? '생성 중...' : '생성'}
+                                    </button>
+                                ) : (
+                                    <div className="relative">
+                                        <textarea 
+                                            readOnly 
+                                            value={midjourneyPrompts.end} 
+                                            rows={3} 
+                                            className="w-full bg-black/30 text-gray-300 text-xs p-3 rounded-lg resize-none font-mono"
+                                        />
+                                        <button 
+                                            onClick={() => handleCopy(midjourneyPrompts.end!, 'midjourney-end')}
+                                            className="absolute top-2 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-all"
+                                        >
+                                            {copiedPrompt === 'midjourney-end' ? 
+                                                <Check className="w-4 h-4 text-green-400" /> : 
+                                                <Clipboard className="w-4 h-4 text-gray-400" />
+                                            }
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <div className="relative group cursor-pointer" onClick={() => onEditImage(scene.id, 'end', details.endFrame)}>
-                            <img src={details.endFrame} alt="End Frame" className="rounded-lg w-full aspect-video object-cover bg-slate-200" />
-                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
-                                <Wand2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                            <span className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-0.5 rounded">종료 프레임</span>
-                        </div>
-                        <div className="bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200">
-                            <h4 className="font-semibold text-sm text-slate-800 flex items-center gap-2"><Bot className="w-4 h-4" />Midjourney 최적화 프롬프트 (종료 프레임)</h4>
-                            {!midjourneyPrompts.end && (
-                                <Button onClick={() => onGenerateMidjourneyPrompt('end')} isLoading={isGeneratingMidjourneyPrompt === 'end'} size="sm" className="mt-2">
-                                    {isGeneratingMidjourneyPrompt === 'end' ? '생성 중...' : '생성'}
-                                </Button>
-                            )}
-                            {midjourneyPrompts.end && (
-                                 <div className="relative mt-2">
-                                    <textarea readOnly value={midjourneyPrompts.end} rows={4} className="w-full bg-slate-200 text-slate-700 text-xs p-2 rounded-md resize-none border border-slate-300 focus:outline-none pr-10 font-mono"></textarea>
-                                     <Button variant="ghost" size="sm" className="absolute top-2 right-2 !p-1.5 h-auto" onClick={() => handleCopy(midjourneyPrompts.end!, 'midjourney-end')}>
-                                        {copiedPrompt === 'midjourney-end' ? <Check className="w-4 h-4 text-green-600" /> : <Clipboard className="w-4 h-4 text-slate-500" />}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
+                    <div className="mt-6 bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border border-blue-500/20 p-4 rounded-xl">
+                        <p className="font-medium text-blue-400 flex items-center gap-2">
+                            <ArrowRight className="w-4 h-4"/>
+                            다음 장면 전환
+                        </p>
+                        <p className="text-xs text-blue-300 mt-1">A quick, elegant cut revealing a hero shot</p>
                     </div>
                     
-                     <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                        <p className="font-semibold text-sm text-blue-800 flex items-center gap-2"><ArrowRight className="w-4 h-4"/>다음 장면으로 전환</p>
-                        <p className="text-xs text-blue-700 mt-1">A quick, elegant cut revealing a hero shot of the '앰플' bottle.</p>
-                    </div>
-                    
-                    <div className="space-y-2 pt-2 border-t border-slate-200">
-                        <p className="text-sm font-medium">다른 AI용 영상 프롬프트</p>
-                        <div className="flex flex-wrap gap-2">
+                    <div className="mt-6 pt-6 border-t border-white/[0.08]">
+                        <p className="text-sm font-medium text-white mb-3">다른 AI 플랫폼용 프롬프트</p>
+                        <div className="flex flex-wrap gap-2 mb-4">
                             {aiModels.map(ai => (
-                                <Button key={ai} variant="ghost" size="sm" onClick={() => onAdaptPrompt(ai)} isLoading={isAdaptingPrompt === ai}>{ai}</Button>
+                                <button 
+                                    key={ai} 
+                                    onClick={() => onAdaptPrompt(ai)}
+                                    disabled={isAdaptingPrompt === ai}
+                                    className="px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.08] text-white text-xs rounded-lg transition-all border border-white/[0.08]"
+                                >
+                                    {isAdaptingPrompt === ai ? '생성 중...' : ai}
+                                </button>
                             ))}
                         </div>
                         {Object.entries(adaptedPrompts).map(([ai, prompt]) => (
-                            prompt && <div key={ai}>
-                                <h5 className="font-semibold text-xs text-blue-600 mt-2">{ai} 최적화 프롬프트</h5>
+                            prompt && <div key={ai} className="mb-3">
+                                <h5 className="text-xs font-medium text-blue-400 mb-2">{ai} 최적화</h5>
                                 <div className="relative">
-                                     {prompt.trim().startsWith('{') ? (
-                                        <pre className="w-full bg-slate-100 text-slate-600 text-xs p-2 mt-1 rounded-md border border-slate-200 whitespace-pre-wrap break-words">{prompt}</pre>
-                                    ) : (
-                                        <textarea readOnly value={prompt} rows={3} className="w-full bg-slate-100 text-slate-600 text-xs p-2 mt-1 rounded-md resize-none border border-slate-200 focus:outline-none pr-10"></textarea>
-                                    )}
-                                     <Button variant="ghost" size="sm" className="absolute top-2 right-2 !p-1.5 h-auto" onClick={() => handleCopy(prompt, ai)}>
-                                        {copiedPrompt === ai ? <Check className="w-4 h-4 text-green-600" /> : <Clipboard className="w-4 h-4 text-slate-500" />}
-                                    </Button>
+                                    <textarea 
+                                        readOnly 
+                                        value={prompt} 
+                                        rows={3} 
+                                        className="w-full bg-black/30 text-gray-300 text-xs p-3 rounded-lg resize-none font-mono"
+                                    />
+                                    <button 
+                                        onClick={() => handleCopy(prompt, ai)}
+                                        className="absolute top-2 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-all"
+                                    >
+                                        {copiedPrompt === ai ? 
+                                            <Check className="w-4 h-4 text-green-400" /> : 
+                                            <Clipboard className="w-4 h-4 text-gray-400" />
+                                        }
+                                    </button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                     <div className="space-y-2 pt-2 border-t border-slate-200">
-                        <p className="text-sm font-medium flex items-center gap-2"><Music className="w-4 h-4" />배경음악 생성 프롬프트 (Suno)</p>
-                        {!sunoPrompt && (
-                            <Button onClick={onGenerateSunoPrompt} isLoading={isGeneratingSunoPrompt} size="sm">
+
+                    <div className="mt-6 pt-6 border-t border-white/[0.08]">
+                        <p className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                            <Music className="w-4 h-4" />
+                            배경음악 생성 (Suno)
+                        </p>
+                        {!sunoPrompt ? (
+                            <button 
+                                onClick={onGenerateSunoPrompt}
+                                disabled={isGeneratingSunoPrompt}
+                                className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm rounded-lg hover:shadow-lg transition-all"
+                            >
                                 {isGeneratingSunoPrompt ? '생성 중...' : '프롬프트 생성'}
-                            </Button>
-                        )}
-                        {sunoPrompt && (
+                            </button>
+                        ) : (
                             <>
-                                <div>
-                                    <h5 className="font-semibold text-xs text-green-600 mt-2">Style Prompt</h5>
-                                    <div className="relative mt-1">
-                                        <textarea readOnly value={sunoPrompt.stylePrompt} rows={3} className="w-full bg-slate-100 text-slate-700 text-xs p-2 rounded-md resize-none border border-slate-200 focus:outline-none pr-10 font-mono"></textarea>
-                                        <Button variant="ghost" size="sm" className="absolute top-2 right-2 !p-1.5 h-auto" onClick={() => handleCopy(sunoPrompt.stylePrompt, 'suno-style')}>
-                                            {copiedPrompt === 'suno-style' ? <Check className="w-4 h-4 text-green-600" /> : <Clipboard className="w-4 h-4 text-slate-500" />}
-                                        </Button>
+                                <div className="mb-3">
+                                    <h5 className="text-xs font-medium text-green-400 mb-2">Style Prompt</h5>
+                                    <div className="relative">
+                                        <textarea 
+                                            readOnly 
+                                            value={sunoPrompt.stylePrompt} 
+                                            rows={3} 
+                                            className="w-full bg-black/30 text-gray-300 text-xs p-3 rounded-lg resize-none font-mono"
+                                        />
+                                        <button 
+                                            onClick={() => handleCopy(sunoPrompt.stylePrompt, 'suno-style')}
+                                            className="absolute top-2 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-all"
+                                        >
+                                            {copiedPrompt === 'suno-style' ? 
+                                                <Check className="w-4 h-4 text-green-400" /> : 
+                                                <Clipboard className="w-4 h-4 text-gray-400" />
+                                            }
+                                        </button>
                                     </div>
                                 </div>
                                 {sunoPrompt.lyrics && (
                                     <div>
-                                        <h5 className="font-semibold text-xs text-green-600 mt-2">Lyrics (가사)</h5>
-                                        <div className="relative mt-1">
-                                            <textarea readOnly value={sunoPrompt.lyrics} rows={5} className="w-full bg-slate-100 text-slate-700 text-xs p-2 rounded-md resize-none border border-slate-200 focus:outline-none pr-10 font-mono"></textarea>
-                                            <Button variant="ghost" size="sm" className="absolute top-2 right-2 !p-1.5 h-auto" onClick={() => handleCopy(sunoPrompt.lyrics, 'suno-lyrics')}>
-                                                {copiedPrompt === 'suno-lyrics' ? <Check className="w-4 h-4 text-green-600" /> : <Clipboard className="w-4 h-4 text-slate-500" />}
-                                            </Button>
+                                        <h5 className="text-xs font-medium text-green-400 mb-2">Lyrics</h5>
+                                        <div className="relative">
+                                            <textarea 
+                                                readOnly 
+                                                value={sunoPrompt.lyrics} 
+                                                rows={5} 
+                                                className="w-full bg-black/30 text-gray-300 text-xs p-3 rounded-lg resize-none font-mono"
+                                            />
+                                            <button 
+                                                onClick={() => handleCopy(sunoPrompt.lyrics, 'suno-lyrics')}
+                                                className="absolute top-2 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-all"
+                                            >
+                                                {copiedPrompt === 'suno-lyrics' ? 
+                                                    <Check className="w-4 h-4 text-green-400" /> : 
+                                                    <Clipboard className="w-4 h-4 text-gray-400" />
+                                                }
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -346,7 +558,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
             )}
         </div>
     );
-}
+};
 
 export default function App() {
     const [topic, setTopic] = useState('화장품 광고');
@@ -377,12 +589,10 @@ export default function App() {
     const [isApiKeySet, setIsApiKeySet] = useState(apiKeyManager.isApiKeySet());
 
     useEffect(() => {
-        // Subscribe to API key changes
         const unsubscribe = apiKeyManager.subscribe(() => {
             setIsApiKeySet(apiKeyManager.isApiKeySet());
         });
         
-        // Check if API key is not set and show modal
         if (!apiKeyManager.isApiKeySet()) {
             setTimeout(() => {
                 setApiKeyModalOpen(true);
@@ -391,7 +601,6 @@ export default function App() {
         
         return unsubscribe;
     }, []);
-
 
     const isGenerating = isGeneratingStoryboard || isGeneratingFrames !== null;
     const selectedScene = storyboard?.scenes.find(s => s.id === selectedSceneId) || null;
@@ -507,7 +716,6 @@ export default function App() {
         }
     }, [storyboard, selectedScene]);
 
-
     const handleDownloadAllImages = () => {
         if (!storyboard) return;
 
@@ -551,48 +759,70 @@ export default function App() {
     };
 
     return (
-        <div className="h-screen w-screen bg-slate-50 flex flex-col">
-            <Header 
-                onGenerate={handleFullGeneration} 
-                isLoading={isGenerating}
-                isApiKeySet={isApiKeySet}
-                onOpenApiKey={() => setApiKeyModalOpen(true)}
-            />
-            <div className="flex-grow flex flex-col p-4 gap-4 overflow-y-auto">
-                <InputPanel 
-                    topic={topic} setTopic={setTopic} 
-                    duration={duration} setDuration={setDuration}
-                    refUrl={refUrl} setRefUrl={setRefUrl}
-                    onOpenGuide={() => setPromptGuideModalOpen(true)}
+        <div className="min-h-screen bg-black">
+            {/* Background gradient */}
+            <div className="fixed inset-0 bg-gradient-to-br from-blue-900/10 via-black to-purple-900/10"></div>
+            
+            {/* Main content */}
+            <div className="relative z-10">
+                <Header 
+                    onGenerate={handleFullGeneration} 
+                    isLoading={isGenerating}
+                    isApiKeySet={isApiKeySet}
+                    onOpenApiKey={() => setApiKeyModalOpen(true)}
                 />
-                <main className="flex-grow flex gap-4 min-h-0">
-                    <LeftPanel model={model} product={product} onAddModel={() => setModelModalOpen(true)} onAddProduct={() => setProductModalOpen(true)} />
-                    <MiddlePanel 
-                        storyboard={storyboard} 
-                        onSelectScene={handleSelectScene} 
-                        selectedSceneId={selectedSceneId} 
-                        isLoading={isGeneratingStoryboard}
-                        generatingSceneId={isGeneratingFrames}
-                        onOpenCreativeDirection={() => setCreativeDirectionModalOpen(true)}
-                        onDownloadAllImages={handleDownloadAllImages}
+                
+                <div className="pt-24 px-6 pb-6 max-w-7xl mx-auto">
+                    <InputPanel 
+                        topic={topic} setTopic={setTopic} 
+                        duration={duration} setDuration={setDuration}
+                        refUrl={refUrl} setRefUrl={setRefUrl}
+                        onOpenGuide={() => setPromptGuideModalOpen(true)}
                     />
-                    <RightPanel 
-                        scene={selectedScene}
-                        onAdaptPrompt={handleAdaptPrompt}
-                        adaptedPrompts={adaptedPrompts}
-                        isGeneratingFrames={isGeneratingFrames === selectedScene?.id}
-                        isAdaptingPrompt={isAdaptingPrompt}
-                        onEditImage={handleOpenImageEditor}
-                        onGenerateMidjourneyPrompt={handleGenerateMidjourneyPrompt}
-                        midjourneyPrompts={midjourneyPrompts}
-                        isGeneratingMidjourneyPrompt={isGeneratingMidjourneyPrompt}
-                        onGenerateSunoPrompt={handleGenerateSunoPrompt}
-                        sunoPrompt={sunoPrompt}
-                        isGeneratingSunoPrompt={isGeneratingSunoPrompt}
-                    />
-                </main>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-240px)]">
+                        <div className="lg:col-span-1">
+                            <LeftPanel 
+                                model={model} 
+                                product={product} 
+                                onAddModel={() => setModelModalOpen(true)} 
+                                onAddProduct={() => setProductModalOpen(true)} 
+                            />
+                        </div>
+                        
+                        <div className="lg:col-span-1">
+                            <MiddlePanel 
+                                storyboard={storyboard} 
+                                onSelectScene={handleSelectScene} 
+                                selectedSceneId={selectedSceneId} 
+                                isLoading={isGeneratingStoryboard}
+                                generatingSceneId={isGeneratingFrames}
+                                onOpenCreativeDirection={() => setCreativeDirectionModalOpen(true)}
+                                onDownloadAllImages={handleDownloadAllImages}
+                            />
+                        </div>
+                        
+                        <div className="lg:col-span-2">
+                            <RightPanel 
+                                scene={selectedScene}
+                                onAdaptPrompt={handleAdaptPrompt}
+                                adaptedPrompts={adaptedPrompts}
+                                isGeneratingFrames={isGeneratingFrames === selectedScene?.id}
+                                isAdaptingPrompt={isAdaptingPrompt}
+                                onEditImage={handleOpenImageEditor}
+                                onGenerateMidjourneyPrompt={handleGenerateMidjourneyPrompt}
+                                midjourneyPrompts={midjourneyPrompts}
+                                isGeneratingMidjourneyPrompt={isGeneratingMidjourneyPrompt}
+                                onGenerateSunoPrompt={handleGenerateSunoPrompt}
+                                sunoPrompt={sunoPrompt}
+                                isGeneratingSunoPrompt={isGeneratingSunoPrompt}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            {/* Modals */}
             <ModelModal isOpen={isModelModalOpen} onClose={() => setModelModalOpen(false)} onSave={setModel} />
             <ProductModal isOpen={isProductModalOpen} onClose={() => setProductModalOpen(false)} onSave={setProduct} />
             <PromptGuideModal isOpen={isPromptGuideModalOpen} onClose={() => setPromptGuideModalOpen(false)} />
