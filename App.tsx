@@ -18,7 +18,7 @@ const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: {
     onOpenApiKey: () => void
 }) => (
     <header className="fixed top-0 left-0 right-0 z-50 glass-dark border-b border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="px-4 py-4">
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <div className="relative">
@@ -255,7 +255,7 @@ const MiddlePanel = ({ storyboard, onSelectScene, selectedSceneId, isLoading, ge
                             : 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.04] hover:border-white/[0.12]'
                     }`}
                 >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-start gap-3">
                         <div className="flex-shrink-0">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
                                 selectedSceneId === scene.id
@@ -265,18 +265,23 @@ const MiddlePanel = ({ storyboard, onSelectScene, selectedSceneId, isLoading, ge
                                 {scene.id}
                             </div>
                         </div>
-                        <div className="flex-grow min-w-0">
-                            <p className="font-medium text-white truncate">{scene.title}</p>
-                            <p className="text-xs text-gray-400 mt-1">{scene.duration}초</p>
+                        <div className="flex-grow">
+                            <p className="font-medium text-white mb-1">{scene.title}</p>
+                            <p className="text-sm text-gray-400 line-clamp-2">{scene.description}</p>
+                            <p className="text-xs text-gray-500 mt-2">{scene.duration}초</p>
                         </div>
-                        <div className="flex gap-2 flex-shrink-0">
-                            {scene.previewImages.map((img, idx) => (
-                                <div key={idx} className="relative">
-                                    <img src={img} alt={`Preview ${idx + 1}`} className="w-16 h-10 object-cover rounded-lg" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                        {scene.previewImages.length > 0 && (
+                            <div className="flex-shrink-0">
+                                <div className="grid grid-cols-2 gap-1">
+                                    {scene.previewImages.slice(0, 2).map((img, idx) => (
+                                        <div key={idx} className="relative">
+                                            <img src={img} alt={`Preview ${idx + 1}`} className="w-20 h-14 object-cover rounded-lg" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             ))}
@@ -772,7 +777,7 @@ export default function App() {
                     onOpenApiKey={() => setApiKeyModalOpen(true)}
                 />
                 
-                <div className="pt-24 px-6 pb-6 max-w-7xl mx-auto">
+                <div className="pt-24 px-4 pb-6">
                     <InputPanel 
                         topic={topic} setTopic={setTopic} 
                         duration={duration} setDuration={setDuration}
@@ -780,8 +785,8 @@ export default function App() {
                         onOpenGuide={() => setPromptGuideModalOpen(true)}
                     />
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-240px)]">
-                        <div className="lg:col-span-1">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-240px)]">
+                        <div className="lg:col-span-3">
                             <LeftPanel 
                                 model={model} 
                                 product={product} 
@@ -790,7 +795,7 @@ export default function App() {
                             />
                         </div>
                         
-                        <div className="lg:col-span-1">
+                        <div className="lg:col-span-5">
                             <MiddlePanel 
                                 storyboard={storyboard} 
                                 onSelectScene={handleSelectScene} 
@@ -802,7 +807,7 @@ export default function App() {
                             />
                         </div>
                         
-                        <div className="lg:col-span-2">
+                        <div className="lg:col-span-4">
                             <RightPanel 
                                 scene={selectedScene}
                                 onAdaptPrompt={handleAdaptPrompt}
