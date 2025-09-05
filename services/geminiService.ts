@@ -169,17 +169,24 @@ Do not include any markdown formatting (like \`\`\`json) in your output. The out
 export const generateModelSheet = async (name: string, description: string, images: File[], colorMode: 'color' | 'bw'): Promise<string> => {
     const prompt = `Generate a photorealistic character sheet based on the reference images for a character named '${name}' and described as: '${description}'.
 
-The output must be a single image containing the following views, arranged in a standard character sheet format on a neutral gray background:
-1. Full body shot (front view)
-2. Full body shot (side view)
-3. Bust shot (front view)
-4. Bust shot (side view)
-5. Bust shot (back view)
+The output must be a single image containing exactly 5 views, arranged horizontally in a single row on a neutral gray background:
+
+**Character Views (5 views in order from left to right):**
+1. FRONT view (정면) - facing camera directly
+2. BACK view (후면) - showing the back of the character
+3. LEFT SIDE view (좌측) - showing the left profile
+4. FRONT view (정면) - facing camera directly (same as view 1)
+5. RIGHT SIDE view (우측) - showing the right profile
 
 **CRITICAL INSTRUCTIONS:**
+- All 5 views must be FULL BODY shots showing the complete character from head to toe.
 - The style must be **photorealistic** and perfectly consistent across all views.
+- The character must maintain exact same appearance, clothing, and proportions in all 5 views.
+- Arrange all 5 views in a SINGLE HORIZONTAL ROW.
+- Each view should be clearly separated but part of one cohesive character sheet.
 - The final image must be a **pure image only**. It must NOT contain any text, letters, numbers, labels, names, annotations, or watermarks. The image should be completely clean.
-- The output should be in ${colorMode === 'color' ? 'full color' : 'black and white'}.`;
+- The output should be in ${colorMode === 'color' ? 'full color' : 'black and white'}.
+- Think of this as a professional character turnaround sheet used in animation/game production.`;
 
     console.log("Generating model sheet with prompt:", prompt);
     console.log(`Using ${images.length} reference images.`);

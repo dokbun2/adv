@@ -198,9 +198,21 @@ export const ModelModal: React.FC<ModelModalProps> = ({ isOpen, onClose, onSave 
               <img src={generatedSheet} alt="Generated character sheet" className="max-w-full max-h-full object-contain rounded-lg" />
             )}
             {!isGenerating && !generatedSheet && (
-              <div className="text-center">
-                <p className="text-white/40">참고 이미지를 추가하고 '생성' 버튼을 누르면</p>
-                <p className="text-white/40 mt-1">여기에 캐릭터 시트(풀바디 2장, 바스트샷 3장)가 생성됩니다.</p>
+              <div className="text-center space-y-3">
+                <div className="w-16 h-16 mx-auto rounded-full bg-white/[0.03] flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white/60 font-medium">캐릭터 시트 생성 준비</p>
+                  <p className="text-white/40 text-sm mt-2">
+                    참고 이미지를 업로드한 후 '생성' 버튼을 클릭하세요
+                  </p>
+                  <p className="text-white/30 text-xs mt-1">
+                    정면 • 후면 • 좌측 • 정면 • 우측 (5개 뷰)
+                  </p>
+                </div>
               </div>
             )}
           </div>
