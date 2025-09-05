@@ -1,0 +1,5 @@
+{
+  "name": "빌더",
+  "description": "An application to create advertisement videos using Gemini, Nanobanana (Gemini 2.5 Flash Image Preview), and VEO-2. Users can input ad concepts, generate models and products, create storyboards, and produce final video content.",
+  "requestFramePermissions": []
+}
