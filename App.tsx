@@ -9,7 +9,7 @@ import { ImageEditorModal } from './components/modals/ImageEditorModal';
 import { PromptGuideModal } from './components/modals/PromptGuideModal';
 import { ApiKeyModal } from './components/modals/ApiKeyModal';
 import { Button } from './components/ui/Button';
-import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu } from 'lucide-react';
+import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu, ChevronDown } from 'lucide-react';
 
 const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: { 
     onGenerate: () => void, 
@@ -71,14 +71,21 @@ const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: {
     </header>
 );
 
-const InputPanel = ({ topic, setTopic, duration, setDuration, refUrl, setRefUrl, onOpenGuide }: {
+// 광고 입력 패널 (컨셉, 스토리, 영상 길이)
+const InputPanel = ({ topic, setTopic, story, setStory, duration, setDuration, onOpenGuide }: {
     topic: string, setTopic: (s: string) => void,
+    story: string, setStory: (s: string) => void,
     duration: number, setDuration: (n: number) => void,
-    refUrl: string, setRefUrl: (s: string) => void,
     onOpenGuide: () => void,
 }) => (
-    <div className="glass rounded-2xl p-6 mb-6 border border-white/[0.08]">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05]">
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+                <Film className="w-5 h-5 text-blue-400" />
+                광고 설정
+            </h3>
+        </div>
+        <div className="space-y-4">
             <div className="relative">
                 <label className="block text-xs font-medium text-gray-400 mb-2">광고 컨셉</label>
                 <div className="relative">
@@ -86,7 +93,7 @@ const InputPanel = ({ topic, setTopic, duration, setDuration, refUrl, setRefUrl,
                         type="text"
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        placeholder="예: 20대 여성을 위한 비건 수분 크림"
+                        placeholder="예: 고혼진 프리미엄 한방 화장품, 고혼진 시그니처 안티에이징 라인"
                         className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
                     />
                     <button 
@@ -98,17 +105,14 @@ const InputPanel = ({ topic, setTopic, duration, setDuration, refUrl, setRefUrl,
                 </div>
             </div>
             <div className="relative">
-                <label className="block text-xs font-medium text-gray-400 mb-2">참고 영상 URL</label>
-                <div className="relative">
-                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <input
-                        type="url"
-                        value={refUrl}
-                        onChange={(e) => setRefUrl(e.target.value)}
-                        placeholder="YouTube URL (선택)"
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
-                    />
-                </div>
+                <label className="block text-xs font-medium text-gray-400 mb-2">스토리</label>
+                <textarea
+                    value={story}
+                    onChange={(e) => setStory(e.target.value)}
+                    placeholder="예: 아침에 일어나 화장을 하는 주인공이 제품을 사용한 후 자신감 있게 하루를 시작한다"
+                    rows={3}
+                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none resize-none"
+                />
             </div>
             <div className="relative">
                 <label className="block text-xs font-medium text-gray-400 mb-2">영상 길이</label>
@@ -126,65 +130,67 @@ const InputPanel = ({ topic, setTopic, duration, setDuration, refUrl, setRefUrl,
     </div>
 );
 
-const LeftPanel = ({ model, product, onAddModel, onAddProduct }: { 
+// 모델 패널
+const ModelPanel = ({ model, onAddModel }: { 
     model: Model | null, 
-    product: Product | null, 
-    onAddModel: () => void, 
-    onAddProduct: () => void 
+    onAddModel: () => void
 }) => (
-    <div className="glass rounded-2xl p-6 h-full border border-white/[0.08]">
-        <div className="flex flex-col h-full gap-6">
-            <div className="flex-1">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-400" />
-                        모델
-                    </h3>
-                </div>
-                <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
-                    <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 min-h-[180px] flex items-center justify-center">
-                        {model ? (
-                            <img src={model.sheetImage} alt={model.name} className="w-full h-full object-contain rounded-lg" />
-                        ) : (
-                            <p className="text-gray-500 text-sm">모델을 추가하세요</p>
-                        )}
-                    </div>
-                </div>
-                <button 
-                    onClick={onAddModel}
-                    className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
-                >
-                    <Users className="w-4 h-4 inline mr-2" />
-                    모델 추가
-                </button>
-            </div>
-            <div className="flex-1">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
-                        <Package className="w-5 h-5 text-purple-400" />
-                        제품
-                    </h3>
-                </div>
-                <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
-                    <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 min-h-[180px] flex items-center justify-center">
-                        {product ? (
-                            <img src={product.image} alt={product.name} className="w-full h-full object-contain rounded-lg" />
-                        ) : (
-                            <p className="text-gray-500 text-sm">제품을 추가하세요</p>
-                        )}
-                    </div>
-                </div>
-                <button 
-                    onClick={onAddProduct}
-                    className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
-                >
-                    <Package className="w-4 h-4 inline mr-2" />
-                    제품 추가
-                </button>
+    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05] h-full">
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-400" />
+                모델
+            </h3>
+        </div>
+        <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
+            <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 aspect-square flex items-center justify-center">
+                {model ? (
+                    <img src={model.sheetImage} alt={model.name} className="w-full h-full object-contain rounded-lg" />
+                ) : (
+                    <p className="text-gray-500 text-sm">모델을 추가하세요</p>
+                )}
             </div>
         </div>
+        <button 
+            onClick={onAddModel}
+            className="mt-3 w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
+        >
+            <Users className="w-4 h-4 inline mr-1" />
+            모델 추가
+        </button>
+    </div>
+);
+
+// 제품 패널
+const ProductPanel = ({ product, onAddProduct }: { 
+    product: Product | null, 
+    onAddProduct: () => void
+}) => (
+    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05] h-full">
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+                <Package className="w-5 h-5 text-purple-400" />
+                제품
+            </h3>
+        </div>
+        <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
+            <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 aspect-square flex items-center justify-center">
+                {product ? (
+                    <img src={product.image} alt={product.name} className="w-full h-full object-contain rounded-lg" />
+                ) : (
+                    <p className="text-gray-500 text-sm">제품을 추가하세요</p>
+                )}
+            </div>
+        </div>
+        <button 
+            onClick={onAddProduct}
+            className="mt-3 w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
+        >
+            <Package className="w-4 h-4 inline mr-1" />
+            제품 추가
+        </button>
     </div>
 );
 
@@ -375,7 +381,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                             <div className="mt-3 bg-white/[0.02] border border-white/[0.08] p-3 rounded-xl">
                                 <h5 className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                                     <Bot className="w-4 h-4" />
-                                    Midjourney 프롬프트 (시작)
+                                    블록화프롬프트
                                 </h5>
                                 {!midjourneyPrompts.start ? (
                                     <button 
@@ -566,9 +572,10 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
 };
 
 export default function App() {
-    const [topic, setTopic] = useState('화장품 광고');
+    const [topic, setTopic] = useState('고혼진 화운 프리미엄 크림 광고');
+    const [story, setStory] = useState('');
     const [duration, setDuration] = useState(40);
-    const [refUrl, setRefUrl] = useState('');
+    const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
 
     const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
     const [selectedSceneId, setSelectedSceneId] = useState<number | null>(null);
@@ -633,7 +640,7 @@ export default function App() {
         
         let storyboardData;
         try {
-            storyboardData = await geminiService.generateStoryboard(topic, '', duration, refUrl);
+            storyboardData = await geminiService.generateStoryboard(topic, story, duration, model, product);
             setStoryboard(storyboardData);
         } catch (error) {
             console.error("Failed to generate storyboard:", error);
@@ -670,7 +677,7 @@ export default function App() {
                 }
             }
         }
-    }, [topic, duration, refUrl, model, product]);
+    }, [topic, story, duration, model, product]);
 
     const handleSelectScene = useCallback((scene: Scene) => {
         setSelectedSceneId(scene.id);
@@ -777,25 +784,55 @@ export default function App() {
                     onOpenApiKey={() => setApiKeyModalOpen(true)}
                 />
                 
-                <div className="pt-24 px-4 pb-6">
-                    <InputPanel 
-                        topic={topic} setTopic={setTopic} 
-                        duration={duration} setDuration={setDuration}
-                        refUrl={refUrl} setRefUrl={setRefUrl}
-                        onOpenGuide={() => setPromptGuideModalOpen(true)}
-                    />
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-240px)]">
-                        <div className="lg:col-span-3">
-                            <LeftPanel 
-                                model={model} 
-                                product={product} 
-                                onAddModel={() => setModelModalOpen(true)} 
-                                onAddProduct={() => setProductModalOpen(true)} 
-                            />
-                        </div>
+                <div className="pt-24 px-4 pb-6 max-w-full">
+                    {/* 상단: 접을 수 있는 광고 설정 섹션 */}
+                    <div className="glass rounded-2xl border border-white/[0.08] mb-4">
+                        <button
+                            onClick={() => setIsSettingsCollapsed(!isSettingsCollapsed)}
+                            className="w-full p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all rounded-t-2xl"
+                        >
+                            <h2 className="font-semibold text-lg text-white flex items-center gap-2">
+                                <Settings className="w-5 h-5 text-blue-400" />
+                                광고 설정
+                            </h2>
+                            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+                                isSettingsCollapsed ? '-rotate-90' : ''
+                            }`} />
+                        </button>
                         
-                        <div className="lg:col-span-5">
+                        <div className={`overflow-hidden transition-all duration-300 ${
+                            isSettingsCollapsed ? 'max-h-0' : 'max-h-[800px]'
+                        }`}>
+                            <div className="p-6 pt-0">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    <InputPanel 
+                                        topic={topic} 
+                                        setTopic={setTopic}
+                                        story={story}
+                                        setStory={setStory}
+                                        duration={duration} 
+                                        setDuration={setDuration}
+                                        onOpenGuide={() => setPromptGuideModalOpen(true)}
+                                    />
+                                    
+                                    <ModelPanel 
+                                        model={model} 
+                                        onAddModel={() => setModelModalOpen(true)} 
+                                    />
+                                    
+                                    <ProductPanel 
+                                        product={product} 
+                                        onAddProduct={() => setProductModalOpen(true)} 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* 하단: 스토리보드와 프레임 생성 - 2:3 비율로 조정 */}
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 h-[calc(100vh-480px)]">
+                        
+                        <div className="lg:col-span-2">
                             <MiddlePanel 
                                 storyboard={storyboard} 
                                 onSelectScene={handleSelectScene} 
@@ -807,7 +844,7 @@ export default function App() {
                             />
                         </div>
                         
-                        <div className="lg:col-span-4">
+                        <div className="lg:col-span-3">
                             <RightPanel 
                                 scene={selectedScene}
                                 onAdaptPrompt={handleAdaptPrompt}

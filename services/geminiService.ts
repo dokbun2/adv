@@ -49,8 +49,14 @@ const base64UrlToPart = (base64Url: string) => {
 };
 
 
-export const generateStoryboard = async (topic: string, content: string, duration: number, refUrl?: string): Promise<Storyboard> => {
-    console.log("Generating storyboard with Gemini:", { topic, content, duration, refUrl });
+export const generateStoryboard = async (
+    topic: string, 
+    story: string, 
+    duration: number, 
+    model: Model | null = null,
+    product: Product | null = null
+): Promise<Storyboard> => {
+    console.log("Generating storyboard with Gemini:", { topic, story, duration, model, product });
 
     const sceneCount = Math.max(4, Math.ceil(duration / 2.5));
     const prompt = `You are a world-class AI Creative Director, tasked with generating a professional advertising scenario based on the "AI Ad Framework - Stage 2" guidelines. Your output must be a single, valid JSON object.
@@ -67,7 +73,10 @@ export const generateStoryboard = async (topic: string, content: string, duratio
 
 **User Input:**
 *   Ad Topic: "${topic}"
+*   Story: "${story || '자동 스토리 생성'}"
 *   Ad Duration: ${duration} seconds
+*   Model: ${model ? `"${model.name}" - ${model.description || '모델 설명'}` : '사용하지 않음'}
+*   Product: ${product ? `"${product.name}" - ${product.description || '제품 설명'}` : '사용하지 않음'}
 
 **Your Task:**
 Generate a complete storyboard. The final output must be a single, valid JSON object with two top-level keys: "styleGuide" and "scenes".
@@ -75,7 +84,10 @@ Generate a complete storyboard. The final output must be a single, valid JSON ob
 **Creative Process:**
 
 **Step 1: Core Concept Definition**
-Analyze the Ad Topic ("${topic}") to define the product category, target audience, and a single, powerful core message.
+Analyze the Ad Topic ("${topic}"), the provided Story ("${story || '자동 생성'}"), Model information, and Product details to define the product category, target audience, and a single, powerful core message.
+${story ? `Incorporate the user's story narrative into the storyboard while maintaining professional advertising standards.` : ''}
+${model ? `Ensure the model character "${model.name}" appears consistently throughout the scenes as the main character.` : ''}
+${product ? `Feature the product "${product.name}" prominently in appropriate scenes, especially in product shots and demonstrations.` : ''}
 
 **Step 2: Narrative Structure & Rhythm**
 Select a suitable storytelling structure (e.g., Problem-Solution, Reverse, etc.) and map out the narrative rhythm according to the ${duration}-second ad length.
@@ -166,8 +178,16 @@ Do not include any markdown formatting (like \`\`\`json) in your output. The out
     };
 };
 
-export const generateModelSheet = async (name: string, description: string, images: File[], colorMode: 'color' | 'bw'): Promise<string> => {
-    const prompt = `Generate a photorealistic character sheet based on the reference images for a character named '${name}' and described as: '${description}'.
+export const generateModelSheet = async (name: string, description: string, images: File[], styleMode: 'realistic' | 'editorial' | 'cinematic' | 'artistic' | 'bw'): Promise<string> => {
+    const styleDescriptions = {
+        realistic: 'photorealistic, natural lighting, true-to-life textures and details',
+        editorial: 'high-fashion editorial style, dramatic poses, magazine-quality lighting',
+        cinematic: 'cinematic lighting with dramatic shadows, film-like color grading, movie poster quality',
+        artistic: 'artistic interpretation with creative lighting, stylized but professional',
+        bw: 'black and white with high contrast, professional monochrome photography'
+    };
+
+    const prompt = `Generate a ${styleDescriptions[styleMode]} character sheet based on the reference images for a character named '${name}' and described as: '${description}'.
 
 The output must be a single image containing exactly 5 views, arranged horizontally in a single row on a neutral gray background:
 
@@ -180,12 +200,12 @@ The output must be a single image containing exactly 5 views, arranged horizonta
 
 **CRITICAL INSTRUCTIONS:**
 - All 5 views must be FULL BODY shots showing the complete character from head to toe.
-- The style must be **photorealistic** and perfectly consistent across all views.
+- The style must be **${styleDescriptions[styleMode]}** and perfectly consistent across all views.
 - The character must maintain exact same appearance, clothing, and proportions in all 5 views.
 - Arrange all 5 views in a SINGLE HORIZONTAL ROW.
 - Each view should be clearly separated but part of one cohesive character sheet.
 - The final image must be a **pure image only**. It must NOT contain any text, letters, numbers, labels, names, annotations, or watermarks. The image should be completely clean.
-- The output should be in ${colorMode === 'color' ? 'full color' : 'black and white'}.
+- ${styleMode === 'bw' ? 'The output must be in BLACK AND WHITE.' : 'The output should be in FULL COLOR with the specified style.'}
 - Think of this as a professional character turnaround sheet used in animation/game production.`;
 
     console.log("Generating model sheet with prompt:", prompt);
@@ -312,23 +332,42 @@ Scene Details:
 };
 
 export const generateMidjourneyPrompt = async (originalPrompt: string, sceneDescription: string, frameType: 'start' | 'end'): Promise<string> => {
-    console.log(`Generating Midjourney prompt for ${frameType} frame`);
-    const frameSpecificContext = `This prompt is for the **${frameType === 'start' ? 'STARTING' : 'ENDING'}** frame of the scene. It should reflect the state of the scene at that specific moment.`;
+    console.log(`Generating Block-structured prompt for ${frameType} frame`);
+    const frameSpecificContext = frameType === 'start' 
+        ? 'establishing shot that introduces the scene' 
+        : 'closing shot that concludes the scene action';
 
-    const prompt = `You are a world-class Midjourney prompt engineer. Your task is to convert a simple scene description into a highly detailed and effective Midjourney prompt.
+    const prompt = `You are a world-class prompt engineer specializing in block-structured prompts for image generation. Your task is to convert a scene description into a highly structured, block-based prompt format.
 
 **Scene Description:** "${sceneDescription}"
 **Original Prompt Context:** "${originalPrompt}"
-**Frame Context:** ${frameSpecificContext}
+**Frame Type:** ${frameType} frame - ${frameSpecificContext}
 
-**Your generated prompt should:**
-1.  Be a single line of text.
-2.  Start with the most important elements (subject, character).
-3.  Include rich details about the scene, lighting, color, and composition appropriate for the specified frame.
-4.  Incorporate stylistic keywords appropriate for a high-end advertisement (e.g., "photorealistic", "cinematic lighting", "8K", "hyper-detailed").
-5.  End with standard Midjourney parameters, including a mandatory aspect ratio of 16:9. Example: "--ar 16:9 --style raw --v 6.0"
+**CRITICAL INSTRUCTIONS:**
+Generate a block-structured prompt using EXACTLY this format with semicolon separators. Each block must be labeled with its category in CAPS followed by a colon, then the value. Use the following structure:
 
-Output ONLY the final prompt string, without any additional explanation, labels, or markdown formatting.`;
+STYLE: [artistic style, genre];
+MEDIUM: [photorealistic/illustrated/3D rendered];
+ERA/CULTURAL_REF: [time period or cultural reference if applicable];
+CAMERA: [camera angle and shot type - ${frameType === 'start' ? 'wide angle establishing shot' : 'close-up or medium shot'}];
+SCENE: [main action or subject description];
+LOCATION: [primary location];
+LOCATION_DETAIL: [specific details about the location];
+TIME_LIGHTING: [time of day];
+ARTIFICIAL_LIGHT: [artificial light sources if any];
+LIGHTING_TECHNIQUE: [lighting style and technique];
+ATMOSPHERE: [mood and emotional tone];
+FOREGROUND: [foreground elements];
+BACKGROUND: [background elements];
+COLOR_TONE: [dominant colors and color grading];
+CAMERA_TECH: [camera/lens specifications];
+QUALITY: [quality descriptors];
+PARAMETERS: --ar 16:9 --style raw --v 6.1 --quality 2
+
+**Example format:**
+STYLE: modern commercial photography; MEDIUM: photorealistic; CAMERA: wide angle establishing shot; SCENE: woman enjoying coffee in modern cafe; LOCATION: urban coffee shop; LOCATION_DETAIL: minimalist interior with large windows; TIME_LIGHTING: golden hour morning; ARTIFICIAL_LIGHT: warm pendant lights; LIGHTING_TECHNIQUE: soft natural lighting with warm tones; ATMOSPHERE: peaceful, sophisticated; FOREGROUND: coffee cup with steam; BACKGROUND: blurred cafe interior; COLOR_TONE: warm browns, cream highlights; CAMERA_TECH: shot on 35mm lens, shallow depth of field; QUALITY: highly detailed, professional photography; PARAMETERS: --ar 16:9 --style raw --v 6.1 --quality 2
+
+Output ONLY the block-structured prompt as a single line with semicolon separators, without any additional explanation or formatting.`;
 
     const response = await getAI().models.generateContent({
         model: 'gemini-2.5-flash',

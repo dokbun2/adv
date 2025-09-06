@@ -15,7 +15,7 @@ export const ModelModal: React.FC<ModelModalProps> = ({ isOpen, onClose, onSave 
   const [modelDesc, setModelDesc] = useState('');
   const [refImages, setRefImages] = useState<File[]>([]);
   const [refPreviews, setRefPreviews] = useState<string[]>([]);
-  const [colorMode, setColorMode] = useState<'color' | 'bw'>('color');
+  const [styleMode, setStyleMode] = useState<'realistic' | 'editorial' | 'cinematic' | 'artistic' | 'bw'>('realistic');
   const [generatedSheet, setGeneratedSheet] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -49,7 +49,7 @@ export const ModelModal: React.FC<ModelModalProps> = ({ isOpen, onClose, onSave 
       setIsGenerating(true);
       setGeneratedSheet(null);
       try {
-          const sheetUrl = await geminiService.generateModelSheet(modelName, modelDesc, refImages, colorMode);
+          const sheetUrl = await geminiService.generateModelSheet(modelName, modelDesc, refImages, styleMode);
           setGeneratedSheet(sheetUrl);
       } catch (error) {
           console.error("Failed to generate model sheet:", error);
@@ -96,7 +96,7 @@ export const ModelModal: React.FC<ModelModalProps> = ({ isOpen, onClose, onSave 
               value={modelName} 
               onChange={(e) => setModelName(e.target.value)} 
               className="w-full bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all" 
-              placeholder="모델 이름을 입력하세요"
+              placeholder="예: 김모델, Sarah Johnson, 30대 여성"
             />
           </div>
           <div>
@@ -107,7 +107,7 @@ export const ModelModal: React.FC<ModelModalProps> = ({ isOpen, onClose, onSave 
               value={modelDesc} 
               onChange={(e) => setModelDesc(e.target.value)} 
               className="w-full bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all resize-none"
-              placeholder="모델에 대한 설명을 입력하세요"
+              placeholder="예: 밝고 활기찬 분위기, 전문적인 이미지, 친근한 표정, 자연스러운 포즈"
             ></textarea>
           </div>
           <div>
@@ -134,23 +134,56 @@ export const ModelModal: React.FC<ModelModalProps> = ({ isOpen, onClose, onSave 
           </div>
           <div>
             <label className="block text-sm font-medium text-white/70 mb-3">스타일</label>
-            <div className="flex items-center gap-2">
+            <div className="grid grid-cols-2 gap-2">
                 <button
                 type="button"
-                onClick={() => setColorMode('color')}
-                className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                  colorMode === 'color' 
+                onClick={() => setStyleMode('realistic')}
+                className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  styleMode === 'realistic' 
                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
                     : 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/80 border border-white/[0.05]'
                 }`}
                 >
-                컬러
+                리얼리스틱
                 </button>
                 <button
                 type="button"
-                onClick={() => setColorMode('bw')}
-                className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                  colorMode === 'bw' 
+                onClick={() => setStyleMode('editorial')}
+                className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  styleMode === 'editorial' 
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/25' 
+                    : 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/80 border border-white/[0.05]'
+                }`}
+                >
+                에디토리얼
+                </button>
+                <button
+                type="button"
+                onClick={() => setStyleMode('cinematic')}
+                className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  styleMode === 'cinematic' 
+                    ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25' 
+                    : 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/80 border border-white/[0.05]'
+                }`}
+                >
+                시네마틱
+                </button>
+                <button
+                type="button"
+                onClick={() => setStyleMode('artistic')}
+                className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  styleMode === 'artistic' 
+                    ? 'bg-gradient-to-r from-green-500 to-teal-600 text-white shadow-lg shadow-green-500/25' 
+                    : 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/80 border border-white/[0.05]'
+                }`}
+                >
+                아티스틱
+                </button>
+                <button
+                type="button"
+                onClick={() => setStyleMode('bw')}
+                className={`col-span-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  styleMode === 'bw' 
                     ? 'bg-gradient-to-r from-gray-600 to-gray-800 text-white shadow-lg shadow-gray-600/25' 
                     : 'bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white/80 border border-white/[0.05]'
                 }`}
