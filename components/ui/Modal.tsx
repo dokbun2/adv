@@ -18,7 +18,7 @@ export const Modal: React.FC<ModalProps & { icon?: React.ComponentType<{ classNa
         className={`bg-black/90 backdrop-blur-xl border border-white/[0.05] rounded-2xl shadow-2xl w-full ${className} overflow-hidden flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-6 border-b border-white/[0.05]">
+        <div className="flex justify-between items-center p-4 border-b border-white/[0.05]">
           <div className="flex items-center gap-3">
             {Icon && (
               <div className="p-2 bg-white/[0.04] rounded-lg">
@@ -36,7 +36,7 @@ export const Modal: React.FC<ModalProps & { icon?: React.ComponentType<{ classNa
             </svg>
           </button>
         </div>
-        <div className="p-6 overflow-y-auto" style={{maxHeight: '70vh'}}>
+        <div className="p-3 overflow-y-auto" style={{maxHeight: '70vh'}}>
           {children}
         </div>
       </div>

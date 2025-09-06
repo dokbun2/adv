@@ -118,7 +118,7 @@ const InputPanel = ({
                         type="text"
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        placeholder="예: 고혼진 프리미엄 한방 화장품, 고혼진 시그니처 안티에이징 라인"
+                        placeholder="예: 비타 500 비타민 음료, 활력 에너지 드링크"
                         className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
                     />
                     <button 
@@ -134,7 +134,7 @@ const InputPanel = ({
                 <textarea
                     value={story}
                     onChange={(e) => setStory(e.target.value)}
-                    placeholder="예: 아침에 일어나 화장을 하는 주인공이 제품을 사용한 후 자신감 있게 하루를 시작한다"
+                    placeholder="예: 비타민 음료 비타 500을 먹고 활기를 찾는 여성"
                     rows={3}
                     className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none resize-none"
                 />
@@ -727,7 +727,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
 };
 
 export default function App() {
-    const [topic, setTopic] = useState('비타 500 비타민 음료');
+    const [topic, setTopic] = useState('');
     const [story, setStory] = useState('');
     const [duration, setDuration] = useState<number | string>('');
     const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
@@ -972,7 +972,7 @@ export default function App() {
                         <div className={`transition-all duration-300 ${
                             isSettingsCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-[800px] overflow-visible'
                         }`}>
-                            <div className={`p-6 pt-5 ${isSettingsCollapsed ? 'invisible' : 'visible'}`}>
+                            <div className={`p-6 pt-2 ${isSettingsCollapsed ? 'invisible' : 'visible'}`}>
                                 <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${
                                     isSettingsCollapsed ? '' : 'overflow-visible'
                                 }`}>
