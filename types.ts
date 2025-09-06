@@ -7,7 +7,9 @@ export interface Scene {
   toneAndMood: string;
   costume: string;
   background: string;
+  complexity?: string; // 'Simple' or 'Complex'
   sceneDetails?: SceneDetails;
+  videoUrl?: string;
 }
 
 export interface Model {
@@ -18,7 +20,7 @@ export interface Model {
 
 export interface Product {
   name: string;
-  image: string; // Base64 or URL
+  images: string[]; // Base64 or URL array
 }
 
 export interface SceneDetails {

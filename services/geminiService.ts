@@ -608,3 +608,114 @@ Output only the JSON object.`;
 
     return JSON.parse(response.text);
 };
+
+export const rewriteScene = async (scene: Scene, editRequest: string): Promise<{ title: string; description: string; }> => {
+    const prompt = `You are a world-class AI Script Writer. You need to rewrite a scene based on the user's edit request.
+
+**Original Scene:**
+- Title: ${scene.title}
+- Description: ${scene.description}
+- Duration: ${scene.duration} seconds
+
+**User's Edit Request:**
+"${editRequest}"
+
+**Your Task:**
+Rewrite the scene based on the edit request while maintaining the scene's duration and core purpose within the overall storyboard.
+The output must be a single, valid JSON object with keys "title" and "description".`;
+
+    const response = await getAI().models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    title: { type: Type.STRING, description: "The new scene title" },
+                    description: { type: Type.STRING, description: "The new scene description" },
+                },
+                required: ["title", "description"],
+            }
+        }
+    });
+
+    return JSON.parse(response.text);
+};
+
+export const generateSceneRewriteSuggestion = async (
+    previousScene: Scene | null, 
+    currentScene: Scene, 
+    nextScene: Scene | null
+): Promise<string> => {
+    const context = [];
+    if (previousScene) {
+        context.push(`**Previous Scene (Scene ${previousScene.id}):**\n- Title: ${previousScene.title}\n- Description: ${previousScene.description}`);
+    }
+    context.push(`**Current Scene (Scene ${currentScene.id}):**\n- Title: ${currentScene.title}\n- Description: ${currentScene.description}`);
+    if (nextScene) {
+        context.push(`**Next Scene (Scene ${nextScene.id}):**\n- Title: ${nextScene.title}\n- Description: ${nextScene.description}`);
+    }
+
+    const prompt = `You are a world-class AI Creative Director. Analyze the current scene within its context and suggest an improvement.
+
+${context.join('\n\n')}
+
+**Your Task:**
+Suggest ONE specific improvement for the current scene that would enhance its impact while maintaining narrative flow with adjacent scenes.
+Focus on visual storytelling, emotional resonance, or pacing improvements.
+Provide a concise suggestion in Korean (1-2 sentences).`;
+
+    const response = await getAI().models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
+
+    return response.text.trim();
+};
+
+export const generateMidjourneyPrompt = async (
+    originalPrompt: string, 
+    sceneDescription: string, 
+    frameType: 'start' | 'end'
+): Promise<string> => {
+    const prompt = `You are an expert at creating Midjourney prompts for advertisement storyboards.
+
+**Scene Description:**
+${sceneDescription}
+
+**Original Frame Generation Prompt:**
+${originalPrompt}
+
+**Frame Type:** ${frameType === 'start' ? 'Starting Frame' : 'Ending Frame'}
+
+**Your Task:**
+Create an optimized Midjourney prompt for the ${frameType} frame of this scene.
+Include specific style parameters, camera angles, lighting, and Midjourney parameters.
+The prompt should be concise but detailed, following Midjourney best practices.
+
+Example format:
+"[subject description], [environment], [lighting], [camera angle], [style], [mood], --ar 16:9 --v 6 --style raw"`;
+
+    const response = await getAI().models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
+
+    return response.text.trim();
+};
+
+export const generateVideo = async (
+    prompt: string,
+    startFrame: string,
+    endFrame: string,
+    duration: number
+): Promise<string> => {
+    // This is a placeholder for VEO video generation
+    // In production, this would integrate with Google's VEO API
+    console.log("Generating video with VEO:", { prompt, duration });
+    
+    // For now, return a placeholder video URL
+    // You would replace this with actual VEO API integration
+    return `https://storage.googleapis.com/veo-sample-videos/placeholder-${Date.now()}.mp4`;
+};

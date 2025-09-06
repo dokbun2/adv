@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Scene, Model, Product, Storyboard, StyleGuide, OtherAIModel, AdaptedPrompts, EditingImageInfo } from './types';
 import * as geminiService from './services/geminiService';
 import apiKeyManager from './services/apiKeyManager';
@@ -8,11 +8,8 @@ import { CreativeDirectionModal } from './components/modals/CreativeDirectionMod
 import { ImageEditorModal } from './components/modals/ImageEditorModal';
 import { PromptGuideModal } from './components/modals/PromptGuideModal';
 import { ApiKeyModal } from './components/modals/ApiKeyModal';
-import { SceneEditorModal } from './components/modals/SceneEditorModal';
 import { Button } from './components/ui/Button';
-import { Accordion } from './components/ui/Accordion';
-import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu, ChevronDown, RotateCcw, X, Video, FileText, UploadCloud, RectangleHorizontal } from 'lucide-react';
-import JSZip from 'jszip';
+import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu, ChevronDown } from 'lucide-react';
 
 const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: { 
     onGenerate: () => void, 
@@ -74,65 +71,13 @@ const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: {
     </header>
 );
 
-// 광고 입력 패널 (컨셉, 스토리, 영상 길이, 시나리오 파일, 화면 비율)
-const InputPanel = ({ 
-    topic, setTopic, 
-    story, setStory, 
-    duration, setDuration, 
-    onOpenGuide,
-    scenario, setScenario,
-    scenarioFileName, setScenarioFileName,
-    aspectRatio, setAspectRatio,
-    requests, setRequests,
-    refUrl, setRefUrl
-}: {
+// 광고 입력 패널 (컨셉, 스토리, 영상 길이)
+const InputPanel = ({ topic, setTopic, story, setStory, duration, setDuration, onOpenGuide }: {
     topic: string, setTopic: (s: string) => void,
     story: string, setStory: (s: string) => void,
     duration: number, setDuration: (n: number) => void,
     onOpenGuide: () => void,
-    scenario: string, setScenario: (s: string) => void,
-    scenarioFileName: string, setScenarioFileName: (s: string) => void,
-    aspectRatio: '16:9' | '9:16', setAspectRatio: (r: '16:9' | '9:16') => void,
-    requests: string, setRequests: (s: string) => void,
-    refUrl: string, setRefUrl: (s: string) => void
-}) => {
-    const [isDropdownOpen, setDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setDropdownOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    const handleScenarioFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (file.type === 'text/plain') {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const content = e.target?.result as string;
-                    setScenario(content);
-                    setScenarioFileName(file.name);
-                };
-                reader.readAsText(file);
-            } else {
-                alert("텍스트(.txt) 파일만 업로드할 수 있습니다.");
-            }
-        }
-        event.target.value = '';
-    };
-
-    const handleClearScenario = () => {
-        setScenario('');
-        setScenarioFileName('');
-    };
-
-    return (
+}) => (
     <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05]">
         <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white flex items-center gap-2">
@@ -169,103 +114,34 @@ const InputPanel = ({
                     className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none resize-none"
                 />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative">
+                <label className="block text-xs font-medium text-gray-400 mb-2">영상 길이</label>
                 <div className="relative">
-                    <label className="block text-xs font-medium text-gray-400 mb-2">영상 길이</label>
-                    <div className="relative">
-                        <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={duration}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === '' || /^\d+$/.test(value)) {
-                                    setDuration(value);
-                                }
-                            }}
-                            placeholder="영상 길이 입력"
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">초</span>
-                    </div>
-                </div>
-                <div className="relative" ref={dropdownRef}>
-                    <label className="block text-xs font-medium text-gray-400 mb-2">화면 비율</label>
-                    <button
-                        type="button"
-                        onClick={() => setDropdownOpen(!isDropdownOpen)}
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none flex justify-between items-center"
-                    >
-                        <span className="flex items-center gap-2">
-                            <RectangleHorizontal className="w-4 h-4 text-gray-400" />
-                            {aspectRatio}
-                        </span>
-                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    {isDropdownOpen && (
-                        <div className="absolute top-full left-0 mt-1 w-full bg-gray-800 border border-white/[0.08] rounded-md shadow-lg z-20">
-                            <button onClick={() => { setAspectRatio('16:9'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05]">16:9 (가로형)</button>
-                            <button onClick={() => { setAspectRatio('9:16'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05]">9:16 (세로형)</button>
-                        </div>
-                    )}
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative">
-                    <label className="block text-xs font-medium text-gray-400 mb-2">요청사항</label>
                     <input
                         type="text"
-                        value={requests}
-                        onChange={(e) => setRequests(e.target.value)}
-                        placeholder="예: 좀 더 역동적인 느낌으로"
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={duration}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || /^\d+$/.test(value)) {
+                                setDuration(value);
+                            }
+                        }}
+                        placeholder="영상 길이 입력"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">초</span>
                 </div>
-                <div className="relative">
-                    <label className="block text-xs font-medium text-gray-400 mb-2">참고 URL</label>
-                    <div className="relative">
-                        <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="url"
-                            value={refUrl}
-                            onChange={(e) => setRefUrl(e.target.value)}
-                            placeholder="참고 URL (선택 사항)"
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className="relative">
-                <label className="block text-xs font-medium text-gray-400 mb-2">시나리오 파일</label>
-                {scenarioFileName ? (
-                    <div className="flex items-center justify-between w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                            <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                            <span className="text-sm truncate" title={scenarioFileName}>{scenarioFileName}</span>
-                        </div>
-                        <button onClick={handleClearScenario} className="text-gray-400 hover:text-white transition-colors">
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
-                ) : (
-                    <label className="flex flex-row items-center justify-center w-full border-2 border-white/[0.08] border-dashed rounded-xl cursor-pointer hover:bg-white/[0.02] transition-colors px-4 py-3">
-                        <UploadCloud className="w-5 h-5 mr-2 text-gray-400" />
-                        <p className="font-semibold text-sm text-gray-400">시나리오 파일 첨부 (.txt)</p>
-                        <input type="file" className="hidden" accept=".txt,text/plain" onChange={handleScenarioFileChange} />
-                    </label>
-                )}
             </div>
         </div>
     </div>
-    );
-};
+);
 
-// 모델 패널 (다중 모델 지원)
-const ModelPanel = ({ models, onAddModel, onRemoveModel }: { 
-    models: Model[], 
-    onAddModel: () => void,
-    onRemoveModel: (index: number) => void
+// 모델 패널
+const ModelPanel = ({ model, onAddModel }: { 
+    model: Model | null, 
+    onAddModel: () => void
 }) => (
     <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05] h-full">
         <div className="flex items-center justify-between mb-4">
@@ -274,53 +150,30 @@ const ModelPanel = ({ models, onAddModel, onRemoveModel }: {
                 모델
             </h3>
         </div>
-        <div className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg min-h-[100px] overflow-y-auto p-2">
-            {models.length > 0 ? (
-                <div className="space-y-2">
-                    {models.map((model, index) => (
-                        <div key={index} className="flex items-center gap-3 p-2 bg-white/[0.02] rounded-lg border border-white/[0.05] relative group">
-                            <img src={model.sheetImage} alt={model.name} className="w-12 h-12 object-cover rounded-md flex-shrink-0" />
-                            <div className="flex-grow min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{model.name}</p>
-                                {model.description && (
-                                    <p className="text-xs text-gray-400 truncate">{model.description}</p>
-                                )}
-                            </div>
-                            <button 
-                                onClick={() => onRemoveModel(index)} 
-                                className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 hover:bg-black/70 transition-all"
-                            >
-                                <X className="w-3 h-3" />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="flex items-center justify-center h-full">
+        <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
+            <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 aspect-square flex items-center justify-center">
+                {model ? (
+                    <img src={model.sheetImage} alt={model.name} className="w-full h-full object-contain rounded-lg" />
+                ) : (
                     <p className="text-gray-500 text-sm">모델을 추가하세요</p>
-                </div>
-            )}
+                )}
+            </div>
         </div>
         <button 
             onClick={onAddModel}
-            disabled={models.length >= 4}
-            className={`mt-3 w-full px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                models.length >= 4 
-                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg hover:scale-[1.02]'
-            }`}
+            className="mt-3 w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
         >
             <Users className="w-4 h-4 inline mr-1" />
-            {models.length >= 4 ? '모델은 최대 4명' : '모델 추가'}
+            모델 추가
         </button>
     </div>
 );
 
-// 제품 패널 (다중 이미지 지원)
-const ProductPanel = ({ product, onAddProduct, onRemoveProduct }: { 
+// 제품 패널
+const ProductPanel = ({ product, onAddProduct }: { 
     product: Product | null, 
-    onAddProduct: () => void,
-    onRemoveProduct: () => void
+    onAddProduct: () => void
 }) => (
     <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05] h-full">
         <div className="flex items-center justify-between mb-4">
@@ -329,39 +182,22 @@ const ProductPanel = ({ product, onAddProduct, onRemoveProduct }: {
                 제품
             </h3>
         </div>
-        <div className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg min-h-[100px] overflow-y-auto p-2 relative group">
-            {product && product.images.length > 0 ? (
-                <>
-                    <button 
-                        onClick={onRemoveProduct} 
-                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 hover:bg-black/70 transition-all z-10"
-                    >
-                        <X className="w-3 h-3" />
-                    </button>
-                    <div className="space-y-2">
-                        {product.images.map((imgSrc, index) => (
-                            <div key={index} className="flex items-center gap-3 p-2 bg-white/[0.02] rounded-lg border border-white/[0.05]">
-                                <img src={imgSrc} alt={`${product.name} ${index + 1}`} className="w-12 h-12 object-cover rounded-md flex-shrink-0" />
-                                <div className="flex-grow min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">{product.name}</p>
-                                    <p className="text-xs text-gray-400">이미지 {index + 1}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </>
-            ) : (
-                <div className="flex items-center justify-center h-full">
+        <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl blur-xl group-hover:blur-2xl transition-all"></div>
+            <div className="relative bg-black/50 border border-white/[0.08] rounded-xl p-4 aspect-square flex items-center justify-center">
+                {product ? (
+                    <img src={product.image} alt={product.name} className="w-full h-full object-contain rounded-lg" />
+                ) : (
                     <p className="text-gray-500 text-sm">제품을 추가하세요</p>
-                </div>
-            )}
+                )}
+            </div>
         </div>
         <button 
             onClick={onAddProduct}
             className="mt-3 w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all hover:scale-[1.02]"
         >
             <Package className="w-4 h-4 inline mr-1" />
-            {product ? '제품 수정' : '제품 추가'}
+            제품 추가
         </button>
     </div>
 );
@@ -796,15 +632,10 @@ export default function App() {
     const [story, setStory] = useState('');
     const [duration, setDuration] = useState<number | string>('');
     const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
-    const [scenario, setScenario] = useState('');
-    const [scenarioFileName, setScenarioFileName] = useState('');
-    const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
-    const [requests, setRequests] = useState('');
-    const [refUrl, setRefUrl] = useState('');
 
     const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
     const [selectedSceneId, setSelectedSceneId] = useState<number | null>(null);
-    const [models, setModels] = useState<Model[]>([]);
+    const [model, setModel] = useState<Model | null>(null);
     const [product, setProduct] = useState<Product | null>(null);
     const [adaptedPrompts, setAdaptedPrompts] = useState<AdaptedPrompts>({});
     const [midjourneyPrompts, setMidjourneyPrompts] = useState<{ start: string | null; end: string | null; }>({ start: null, end: null });
@@ -816,12 +647,7 @@ export default function App() {
     const [isImageEditorModalOpen, setImageEditorModalOpen] = useState(false);
     const [isPromptGuideModalOpen, setPromptGuideModalOpen] = useState(false);
     const [isApiKeyModalOpen, setApiKeyModalOpen] = useState(false);
-    const [isSceneEditorModalOpen, setSceneEditorModalOpen] = useState(false);
     const [editingImageInfo, setEditingImageInfo] = useState<EditingImageInfo | null>(null);
-    const [editingScene, setEditingScene] = useState<Scene | null>(null);
-    const [isGeneratingVideo, setIsGeneratingVideo] = useState<number | null>(null);
-    const [draggedSceneId, setDraggedSceneId] = useState<number | null>(null);
-    const [dragOverSceneId, setDragOverSceneId] = useState<number | null>(null);
     
     const [isGeneratingStoryboard, setIsGeneratingStoryboard] = useState(false);
     const [isGeneratingFrames, setIsGeneratingFrames] = useState<number | null>(null);
@@ -1049,31 +875,16 @@ export default function App() {
                                         duration={duration} 
                                         setDuration={setDuration}
                                         onOpenGuide={() => setPromptGuideModalOpen(true)}
-                                        scenario={scenario}
-                                        setScenario={setScenario}
-                                        scenarioFileName={scenarioFileName}
-                                        setScenarioFileName={setScenarioFileName}
-                                        aspectRatio={aspectRatio}
-                                        setAspectRatio={setAspectRatio}
-                                        requests={requests}
-                                        setRequests={setRequests}
-                                        refUrl={refUrl}
-                                        setRefUrl={setRefUrl}
                                     />
                                     
                                     <ModelPanel 
-                                        models={models} 
-                                        onAddModel={() => setModelModalOpen(true)}
-                                        onRemoveModel={(index) => {
-                                            const newModels = models.filter((_, i) => i !== index);
-                                            setModels(newModels);
-                                        }}
+                                        model={model} 
+                                        onAddModel={() => setModelModalOpen(true)} 
                                     />
                                     
                                     <ProductPanel 
                                         product={product} 
-                                        onAddProduct={() => setProductModalOpen(true)}
-                                        onRemoveProduct={() => setProduct(null)}
+                                        onAddProduct={() => setProductModalOpen(true)} 
                                     />
                                 </div>
                             </div>
@@ -1116,29 +927,7 @@ export default function App() {
             </div>
 
             {/* Modals */}
-            <ModelModal isOpen={isModelModalOpen} onClose={() => setModelModalOpen(false)} onSave={(newModel) => {
-                if (models.length >= 4) {
-                    alert("모델은 최대 4명까지 추가할 수 있습니다.");
-                    return;
-                }
-                const newModels = [...models, newModel];
-                setModels(newModels);
-            }} />
-            <SceneEditorModal
-                isOpen={isSceneEditorModalOpen}
-                onClose={() => setSceneEditorModalOpen(false)}
-                scene={editingScene}
-                storyboard={storyboard}
-                onSave={(updatedScene) => {
-                    if (storyboard) {
-                        const updatedScenes = storyboard.scenes.map(s =>
-                            s.id === updatedScene.id ? updatedScene : s
-                        );
-                        setStoryboard({ ...storyboard, scenes: updatedScenes });
-                    }
-                    setSceneEditorModalOpen(false);
-                }}
-            />
+            <ModelModal isOpen={isModelModalOpen} onClose={() => setModelModalOpen(false)} onSave={setModel} />
             <ProductModal isOpen={isProductModalOpen} onClose={() => setProductModalOpen(false)} onSave={setProduct} />
             <PromptGuideModal isOpen={isPromptGuideModalOpen} onClose={() => setPromptGuideModalOpen(false)} />
             <ApiKeyModal isOpen={isApiKeyModalOpen} onClose={() => setApiKeyModalOpen(false)} />
