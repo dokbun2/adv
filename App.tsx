@@ -118,10 +118,18 @@ const InputPanel = ({ topic, setTopic, story, setStory, duration, setDuration, o
                 <label className="block text-xs font-medium text-gray-400 mb-2">영상 길이</label>
                 <div className="relative">
                     <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         value={duration}
-                        onChange={(e) => setDuration(Number(e.target.value))}
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || /^\d+$/.test(value)) {
+                                setDuration(value);
+                            }
+                        }}
+                        placeholder="영상 길이 입력"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">초</span>
                 </div>
@@ -311,6 +319,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
 }) => {
     const aiModels: OtherAIModel[] = [OtherAIModel.VEO3, OtherAIModel.KLING, OtherAIModel.HAILUO, OtherAIModel.HICKSFIELD];
     const [copiedPrompt, setCopiedPrompt] = useState('');
+    const [activeTab, setActiveTab] = useState<'image' | 'video' | 'audio'>('image');
     const details = scene?.sceneDetails;
 
     const handleCopy = (text: string, id: string) => {
@@ -367,7 +376,43 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                         </pre>
                     </div>
 
-                    <div className="space-y-4">
+                    {/* Tab Navigation */}
+                    <div className="flex gap-2 mb-4 bg-white/[0.02] p-1 rounded-lg">
+                        <button
+                            onClick={() => setActiveTab('image')}
+                            className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all ${
+                                activeTab === 'image' 
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                                    : 'text-gray-400 hover:text-white hover:bg-white/[0.05]'
+                            }`}
+                        >
+                            이미지
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('video')}
+                            className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all ${
+                                activeTab === 'video' 
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                                    : 'text-gray-400 hover:text-white hover:bg-white/[0.05]'
+                            }`}
+                        >
+                            영상
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('audio')}
+                            className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all ${
+                                activeTab === 'audio' 
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                                    : 'text-gray-400 hover:text-white hover:bg-white/[0.05]'
+                            }`}
+                        >
+                            오디오
+                        </button>
+                    </div>
+
+                    {/* Image Tab */}
+                    {activeTab === 'image' && (
+                        <div className="space-y-4">
                         {/* Start Frame */}
                         <div>
                             <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => onEditImage(scene.id, 'start', details.startFrame)}>
@@ -381,7 +426,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                             <div className="mt-3 bg-white/[0.02] border border-white/[0.08] p-3 rounded-xl">
                                 <h5 className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                                     <Bot className="w-4 h-4" />
-                                    블록화프롬프트
+                                    블록화프롬프트 (START FRAME)
                                 </h5>
                                 {!midjourneyPrompts.start ? (
                                     <button 
@@ -426,7 +471,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                             <div className="mt-3 bg-white/[0.02] border border-white/[0.08] p-3 rounded-xl">
                                 <h5 className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                                     <Bot className="w-4 h-4" />
-                                    Midjourney 프롬프트 (종료)
+                                    블록화프롬프트 (END FRAME)
                                 </h5>
                                 {!midjourneyPrompts.end ? (
                                     <button 
@@ -457,18 +502,22 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                                 )}
                             </div>
                         </div>
-                    </div>
+                        </div>
+                    )}
 
-                    <div className="mt-6 bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border border-blue-500/20 p-4 rounded-xl">
-                        <p className="font-medium text-blue-400 flex items-center gap-2">
-                            <ArrowRight className="w-4 h-4"/>
-                            다음 장면 전환
-                        </p>
-                        <p className="text-xs text-blue-300 mt-1">A quick, elegant cut revealing a hero shot</p>
-                    </div>
-                    
-                    <div className="mt-6 pt-6 border-t border-white/[0.08]">
-                        <p className="text-sm font-medium text-white mb-3">다른 AI 플랫폼용 프롬프트</p>
+                    {/* Video Tab */}
+                    {activeTab === 'video' && (
+                        <div className="space-y-4">
+                            <div className="bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border border-blue-500/20 p-4 rounded-xl">
+                                <p className="font-medium text-blue-400 flex items-center gap-2">
+                                    <ArrowRight className="w-4 h-4"/>
+                                    다음 장면 전환
+                                </p>
+                                <p className="text-xs text-blue-300 mt-1">A quick, elegant cut revealing a hero shot</p>
+                            </div>
+                            
+                            <div>
+                                <p className="text-sm font-medium text-white mb-3">다른 AI 플랫폼용 프롬프트</p>
                         <div className="flex flex-wrap gap-2 mb-4">
                             {aiModels.map(ai => (
                                 <button 
@@ -503,13 +552,18 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                                 </div>
                             </div>
                         ))}
-                    </div>
+                            </div>
+                        </div>
+                    )}
 
-                    <div className="mt-6 pt-6 border-t border-white/[0.08]">
-                        <p className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-                            <Music className="w-4 h-4" />
-                            배경음악 생성 (Suno)
-                        </p>
+                    {/* Audio Tab */}
+                    {activeTab === 'audio' && (
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                                    <Music className="w-4 h-4" />
+                                    배경음악 생성 (Suno)
+                                </p>
                         {!sunoPrompt ? (
                             <button 
                                 onClick={onGenerateSunoPrompt}
@@ -564,7 +618,9 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
                                 )}
                             </>
                         )}
-                    </div>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </div>
@@ -574,7 +630,7 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
 export default function App() {
     const [topic, setTopic] = useState('고혼진 화운 프리미엄 크림 광고');
     const [story, setStory] = useState('');
-    const [duration, setDuration] = useState(40);
+    const [duration, setDuration] = useState<number | string>('');
     const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
 
     const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
@@ -640,7 +696,13 @@ export default function App() {
         
         let storyboardData;
         try {
-            storyboardData = await geminiService.generateStoryboard(topic, story, duration, model, product);
+            const numericDuration = typeof duration === 'string' ? parseInt(duration) : duration;
+            if (!numericDuration || numericDuration <= 0) {
+                alert("영상 길이를 올바르게 입력해주세요.");
+                setIsGeneratingStoryboard(false);
+                return;
+            }
+            storyboardData = await geminiService.generateStoryboard(topic, story, numericDuration, model, product);
             setStoryboard(storyboardData);
         } catch (error) {
             console.error("Failed to generate storyboard:", error);
