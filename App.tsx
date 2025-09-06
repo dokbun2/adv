@@ -11,7 +11,7 @@ import { ApiKeyModal } from './components/modals/ApiKeyModal';
 import { SceneEditorModal } from './components/modals/SceneEditorModal';
 import { Button } from './components/ui/Button';
 import { Accordion } from './components/ui/Accordion';
-import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu, ChevronDown, RotateCcw, X, Video, FileText, UploadCloud, RectangleHorizontal } from 'lucide-react';
+import { Film, Users, Package, Link, ArrowRight, Info, Clipboard, Check, Sparkles, BookOpen, Wand2, Languages, Bot, Download, Music, Key, Settings, PlayCircle, ChevronRight, Zap, Layers, Cpu, ChevronDown, RotateCcw, X, Video, FileText, UploadCloud, RectangleHorizontal, Square, Smartphone } from 'lucide-react';
 import JSZip from 'jszip';
 
 const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: { 
@@ -74,27 +74,19 @@ const Header = ({ onGenerate, isLoading, isApiKeySet, onOpenApiKey }: {
     </header>
 );
 
-// 광고 입력 패널 (컨셉, 스토리, 영상 길이, 시나리오 파일, 화면 비율)
+// 광고 입력 패널 (컨셉, 스토리, 영상 길이, 화면 비율)
 const InputPanel = ({ 
     topic, setTopic, 
     story, setStory, 
     duration, setDuration, 
     onOpenGuide,
-    scenario, setScenario,
-    scenarioFileName, setScenarioFileName,
-    aspectRatio, setAspectRatio,
-    requests, setRequests,
-    refUrl, setRefUrl
+    aspectRatio, setAspectRatio
 }: {
     topic: string, setTopic: (s: string) => void,
     story: string, setStory: (s: string) => void,
     duration: number, setDuration: (n: number) => void,
     onOpenGuide: () => void,
-    scenario: string, setScenario: (s: string) => void,
-    scenarioFileName: string, setScenarioFileName: (s: string) => void,
-    aspectRatio: '16:9' | '9:16', setAspectRatio: (r: '16:9' | '9:16') => void,
-    requests: string, setRequests: (s: string) => void,
-    refUrl: string, setRefUrl: (s: string) => void
+    aspectRatio: '16:9' | '1:1' | '9:16', setAspectRatio: (r: '16:9' | '1:1' | '9:16') => void
 }) => {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -109,31 +101,9 @@ const InputPanel = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleScenarioFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (file.type === 'text/plain') {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const content = e.target?.result as string;
-                    setScenario(content);
-                    setScenarioFileName(file.name);
-                };
-                reader.readAsText(file);
-            } else {
-                alert("텍스트(.txt) 파일만 업로드할 수 있습니다.");
-            }
-        }
-        event.target.value = '';
-    };
-
-    const handleClearScenario = () => {
-        setScenario('');
-        setScenarioFileName('');
-    };
 
     return (
-    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05]">
+    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05] overflow-visible">
         <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white flex items-center gap-2">
                 <Film className="w-5 h-5 text-blue-400" />
@@ -204,57 +174,22 @@ const InputPanel = ({
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isDropdownOpen && (
-                        <div className="absolute top-full left-0 mt-1 w-full bg-gray-800 border border-white/[0.08] rounded-md shadow-lg z-20">
-                            <button onClick={() => { setAspectRatio('16:9'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05]">16:9 (가로형)</button>
-                            <button onClick={() => { setAspectRatio('9:16'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05]">9:16 (세로형)</button>
+                        <div className="absolute top-full left-0 mt-1 w-full bg-gray-800 border border-white/[0.08] rounded-md shadow-lg z-50">
+                            <button onClick={() => { setAspectRatio('16:9'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05] flex items-center gap-2">
+                                <RectangleHorizontal className="w-4 h-4" />
+                                16:9 (가로형)
+                            </button>
+                            <button onClick={() => { setAspectRatio('1:1'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05] flex items-center gap-2">
+                                <Square className="w-4 h-4" />
+                                1:1 (정사각형)
+                            </button>
+                            <button onClick={() => { setAspectRatio('9:16'); setDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/[0.05] flex items-center gap-2">
+                                <Smartphone className="w-4 h-4" />
+                                9:16 (세로형)
+                            </button>
                         </div>
                     )}
                 </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="relative">
-                    <label className="block text-xs font-medium text-gray-400 mb-2">요청사항</label>
-                    <input
-                        type="text"
-                        value={requests}
-                        onChange={(e) => setRequests(e.target.value)}
-                        placeholder="예: 좀 더 역동적인 느낌으로"
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
-                    />
-                </div>
-                <div className="relative">
-                    <label className="block text-xs font-medium text-gray-400 mb-2">참고 URL</label>
-                    <div className="relative">
-                        <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="url"
-                            value={refUrl}
-                            onChange={(e) => setRefUrl(e.target.value)}
-                            placeholder="참고 URL (선택 사항)"
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:bg-white/[0.05] transition-all outline-none"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className="relative">
-                <label className="block text-xs font-medium text-gray-400 mb-2">시나리오 파일</label>
-                {scenarioFileName ? (
-                    <div className="flex items-center justify-between w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                            <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                            <span className="text-sm truncate" title={scenarioFileName}>{scenarioFileName}</span>
-                        </div>
-                        <button onClick={handleClearScenario} className="text-gray-400 hover:text-white transition-colors">
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
-                ) : (
-                    <label className="flex flex-row items-center justify-center w-full border-2 border-white/[0.08] border-dashed rounded-xl cursor-pointer hover:bg-white/[0.02] transition-colors px-4 py-3">
-                        <UploadCloud className="w-5 h-5 mr-2 text-gray-400" />
-                        <p className="font-semibold text-sm text-gray-400">시나리오 파일 첨부 (.txt)</p>
-                        <input type="file" className="hidden" accept=".txt,text/plain" onChange={handleScenarioFileChange} />
-                    </label>
-                )}
             </div>
         </div>
     </div>
@@ -274,7 +209,7 @@ const ModelPanel = ({ models, onAddModel, onRemoveModel }: {
                 모델
             </h3>
         </div>
-        <div className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg min-h-[100px] overflow-y-auto p-2">
+        <div className="aspect-square bg-white/[0.03] border border-white/[0.08] rounded-lg overflow-y-auto p-2">
             {models.length > 0 ? (
                 <div className="space-y-2">
                     {models.map((model, index) => (
@@ -329,7 +264,7 @@ const ProductPanel = ({ product, onAddProduct, onRemoveProduct }: {
                 제품
             </h3>
         </div>
-        <div className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg min-h-[100px] overflow-y-auto p-2 relative group">
+        <div className="aspect-square bg-white/[0.03] border border-white/[0.08] rounded-lg overflow-y-auto p-2 relative group">
             {product && product.images.length > 0 ? (
                 <>
                     <button 
@@ -375,7 +310,7 @@ const MiddlePanel = ({ storyboard, onSelectScene, selectedSceneId, isLoading, ge
     onOpenCreativeDirection: () => void,
     onDownloadAllImages: () => void,
 }) => (
-    <div className="glass rounded-2xl p-6 h-full border border-white/[0.08] flex flex-col">
+    <div className="glass rounded-2xl p-6 border border-white/[0.08] flex flex-col h-full">
         <div className="flex justify-between items-center mb-6">
             <h3 className="font-semibold text-lg text-white flex items-center gap-2">
                 <Layers className="w-5 h-5 text-green-400" />
@@ -494,14 +429,14 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
 
     if (!scene) {
         return (
-            <div className="glass rounded-2xl p-6 h-full border border-white/[0.08] flex items-center justify-center">
+            <div className="glass rounded-2xl p-6 border border-white/[0.08] flex items-center justify-center h-full">
                 <p className="text-gray-400">스토리보드에서 장면을 선택하세요</p>
             </div>
         );
     }
 
     return (
-        <div className="glass rounded-2xl p-6 h-full border border-white/[0.08] overflow-y-auto">
+        <div className="glass rounded-2xl p-6 border border-white/[0.08] overflow-y-auto h-full">
             <h3 className="font-semibold text-lg text-white mb-4 flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-orange-400" />
                 시나리오
@@ -792,15 +727,11 @@ const RightPanel = ({ scene, onAdaptPrompt, adaptedPrompts, isGeneratingFrames, 
 };
 
 export default function App() {
-    const [topic, setTopic] = useState('고혼진 화운 프리미엄 크림 광고');
+    const [topic, setTopic] = useState('비타 500 비타민 음료');
     const [story, setStory] = useState('');
     const [duration, setDuration] = useState<number | string>('');
     const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
-    const [scenario, setScenario] = useState('');
-    const [scenarioFileName, setScenarioFileName] = useState('');
-    const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
-    const [requests, setRequests] = useState('');
-    const [refUrl, setRefUrl] = useState('');
+    const [aspectRatio, setAspectRatio] = useState<'16:9' | '1:1' | '9:16'>('16:9');
 
     const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
     const [selectedSceneId, setSelectedSceneId] = useState<number | null>(null);
@@ -857,7 +788,7 @@ export default function App() {
             alert("광고 주제를 입력해주세요.");
             return;
         }
-        if (!model || !product) {
+        if (models.length === 0 || !product) {
             alert("모델과 제품을 먼저 추가해야 합니다.");
             return;
         }
@@ -876,7 +807,7 @@ export default function App() {
                 setIsGeneratingStoryboard(false);
                 return;
             }
-            storyboardData = await geminiService.generateStoryboard(topic, story, numericDuration, model, product);
+            storyboardData = await geminiService.generateStoryboard(topic, story, numericDuration, models[0], product, aspectRatio);
             setStoryboard(storyboardData);
         } catch (error) {
             console.error("Failed to generate storyboard:", error);
@@ -892,7 +823,7 @@ export default function App() {
             for (const scene of storyboardData.scenes) {
                 try {
                     setIsGeneratingFrames(scene.id);
-                    const details = await geminiService.generateSceneFrames(scene, model, product, storyboardData.styleGuide);
+                    const details = await geminiService.generateSceneFrames(scene, models[0], product, storyboardData.styleGuide);
 
                     setStoryboard(currentStoryboard => {
                         if (!currentStoryboard) return null;
@@ -913,7 +844,7 @@ export default function App() {
                 }
             }
         }
-    }, [topic, story, duration, model, product]);
+    }, [topic, story, duration, models, product, aspectRatio]);
 
     const handleSelectScene = useCallback((scene: Scene) => {
         setSelectedSceneId(scene.id);
@@ -1022,7 +953,9 @@ export default function App() {
                 
                 <div className="pt-24 px-4 pb-6 max-w-full">
                     {/* 상단: 접을 수 있는 광고 설정 섹션 */}
-                    <div className="glass rounded-2xl border border-white/[0.08] mb-4">
+                    <div className={`glass rounded-2xl border border-white/[0.08] mb-4 ${
+                        isSettingsCollapsed ? 'overflow-hidden' : 'overflow-visible'
+                    }`}>
                         <button
                             onClick={() => setIsSettingsCollapsed(!isSettingsCollapsed)}
                             className="w-full p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all rounded-t-2xl"
@@ -1036,11 +969,13 @@ export default function App() {
                             }`} />
                         </button>
                         
-                        <div className={`overflow-hidden transition-all duration-300 ${
-                            isSettingsCollapsed ? 'max-h-0' : 'max-h-[800px]'
+                        <div className={`transition-all duration-300 ${
+                            isSettingsCollapsed ? 'max-h-0 overflow-hidden' : 'max-h-[800px] overflow-visible'
                         }`}>
-                            <div className="p-6 pt-0">
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <div className={`p-6 pt-5 ${isSettingsCollapsed ? 'invisible' : 'visible'}`}>
+                                <div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${
+                                    isSettingsCollapsed ? '' : 'overflow-visible'
+                                }`}>
                                     <InputPanel 
                                         topic={topic} 
                                         setTopic={setTopic}
@@ -1049,16 +984,8 @@ export default function App() {
                                         duration={duration} 
                                         setDuration={setDuration}
                                         onOpenGuide={() => setPromptGuideModalOpen(true)}
-                                        scenario={scenario}
-                                        setScenario={setScenario}
-                                        scenarioFileName={scenarioFileName}
-                                        setScenarioFileName={setScenarioFileName}
                                         aspectRatio={aspectRatio}
                                         setAspectRatio={setAspectRatio}
-                                        requests={requests}
-                                        setRequests={setRequests}
-                                        refUrl={refUrl}
-                                        setRefUrl={setRefUrl}
                                     />
                                     
                                     <ModelPanel 
@@ -1081,9 +1008,9 @@ export default function App() {
                     </div>
                     
                     {/* 하단: 스토리보드와 프레임 생성 - 2:3 비율로 조정 */}
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 h-[calc(100vh-480px)]">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                         
-                        <div className="lg:col-span-2">
+                        <div className="lg:col-span-2 min-h-[600px]">
                             <MiddlePanel 
                                 storyboard={storyboard} 
                                 onSelectScene={handleSelectScene} 
@@ -1095,7 +1022,7 @@ export default function App() {
                             />
                         </div>
                         
-                        <div className="lg:col-span-3">
+                        <div className="lg:col-span-3 min-h-[600px]">
                             <RightPanel 
                                 scene={selectedScene}
                                 onAdaptPrompt={handleAdaptPrompt}

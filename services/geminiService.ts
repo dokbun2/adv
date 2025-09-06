@@ -54,9 +54,10 @@ export const generateStoryboard = async (
     story: string, 
     duration: number, 
     model: Model | null = null,
-    product: Product | null = null
+    product: Product | null = null,
+    aspectRatio: '16:9' | '1:1' | '9:16' = '16:9'
 ): Promise<Storyboard> => {
-    console.log("Generating storyboard with Gemini:", { topic, story, duration, model, product });
+    console.log("Generating storyboard with Gemini:", { topic, story, duration, model, product, aspectRatio });
 
     const sceneCount = Math.max(4, Math.ceil(duration / 2.5));
     const prompt = `You are a world-class AI Creative Director, tasked with generating a professional advertising scenario based on the "AI Ad Framework - Stage 2" guidelines. Your output must be a single, valid JSON object.
@@ -75,6 +76,7 @@ export const generateStoryboard = async (
 *   Ad Topic: "${topic}"
 *   Story: "${story || '자동 스토리 생성'}"
 *   Ad Duration: ${duration} seconds
+*   Aspect Ratio: ${aspectRatio} ${aspectRatio === '16:9' ? '(가로형 광고)' : aspectRatio === '1:1' ? '(정사각형 광고)' : '(세로형 광고)'}
 *   Model: ${model ? `"${model.name}" - ${model.description || '모델 설명'}` : '사용하지 않음'}
 *   Product: ${product ? `"${product.name}" - ${product.description || '제품 설명'}` : '사용하지 않음'}
 
@@ -94,6 +96,10 @@ Select a suitable storytelling structure (e.g., Problem-Solution, Reverse, etc.)
 
 **Step 3: Creative Direction (Style Guide)**
 Define a cohesive style guide for visual and tonal consistency.
+IMPORTANT: All visual compositions must be optimized for ${aspectRatio} aspect ratio:
+${aspectRatio === '16:9' ? '- Wide horizontal format for desktop/TV viewing\n- Utilize horizontal space for product placement and text\n- Consider landscape composition for all scenes' : 
+  aspectRatio === '1:1' ? '- Square format for social media (Instagram, Facebook)\n- Center-focused composition\n- Keep important elements in the middle area' : 
+  '- Vertical format for mobile viewing (TikTok, Instagram Reels)\n- Vertical composition with top/bottom safe zones\n- Stack elements vertically for better mobile visibility'}
 
 **Step 4: Detailed Scene-by-Scene Scenario**
 Create a sequence of exactly ${sceneCount} scenes. The total duration of all scenes must sum up to approximately ${duration} seconds.
@@ -198,15 +204,23 @@ The output must be a single image containing exactly 5 views, arranged horizonta
 4. FRONT view (정면) - facing camera directly (same as view 1)
 5. RIGHT SIDE view (우측) - showing the right profile
 
-**CRITICAL INSTRUCTIONS:**
+**CRITICAL INSTRUCTIONS - NO TEXT ALLOWED:**
 - All 5 views must be FULL BODY shots showing the complete character from head to toe.
 - The style must be **${styleDescriptions[styleMode]}** and perfectly consistent across all views.
 - The character must maintain exact same appearance, clothing, and proportions in all 5 views.
 - Arrange all 5 views in a SINGLE HORIZONTAL ROW.
 - Each view should be clearly separated but part of one cohesive character sheet.
-- The final image must be a **pure image only**. It must NOT contain any text, letters, numbers, labels, names, annotations, or watermarks. The image should be completely clean.
+
+**ABSOLUTELY NO TEXT OR LABELS:**
+- The final image must be a **PURE IMAGE ONLY without ANY text whatsoever**.
+- DO NOT include any text, labels, names, numbers, titles, annotations, watermarks, or written elements of any kind.
+- DO NOT add view labels like "FRONT", "BACK", "SIDE", etc.
+- DO NOT include character name or any descriptive text.
+- The image must be COMPLETELY CLEAN with only the character visuals.
+- This is a VISUAL-ONLY character sheet with NO textual elements.
+
 - ${styleMode === 'bw' ? 'The output must be in BLACK AND WHITE.' : 'The output should be in FULL COLOR with the specified style.'}
-- Think of this as a professional character turnaround sheet used in animation/game production.`;
+- Think of this as a professional character turnaround sheet used in animation/game production, but WITHOUT any text labels.`;
 
     console.log("Generating model sheet with prompt:", prompt);
     console.log(`Using ${images.length} reference images.`);
@@ -674,48 +688,3 @@ Provide a concise suggestion in Korean (1-2 sentences).`;
     return response.text.trim();
 };
 
-export const generateMidjourneyPrompt = async (
-    originalPrompt: string, 
-    sceneDescription: string, 
-    frameType: 'start' | 'end'
-): Promise<string> => {
-    const prompt = `You are an expert at creating Midjourney prompts for advertisement storyboards.
-
-**Scene Description:**
-${sceneDescription}
-
-**Original Frame Generation Prompt:**
-${originalPrompt}
-
-**Frame Type:** ${frameType === 'start' ? 'Starting Frame' : 'Ending Frame'}
-
-**Your Task:**
-Create an optimized Midjourney prompt for the ${frameType} frame of this scene.
-Include specific style parameters, camera angles, lighting, and Midjourney parameters.
-The prompt should be concise but detailed, following Midjourney best practices.
-
-Example format:
-"[subject description], [environment], [lighting], [camera angle], [style], [mood], --ar 16:9 --v 6 --style raw"`;
-
-    const response = await getAI().models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-    });
-
-    return response.text.trim();
-};
-
-export const generateVideo = async (
-    prompt: string,
-    startFrame: string,
-    endFrame: string,
-    duration: number
-): Promise<string> => {
-    // This is a placeholder for VEO video generation
-    // In production, this would integrate with Google's VEO API
-    console.log("Generating video with VEO:", { prompt, duration });
-    
-    // For now, return a placeholder video URL
-    // You would replace this with actual VEO API integration
-    return `https://storage.googleapis.com/veo-sample-videos/placeholder-${Date.now()}.mp4`;
-};
